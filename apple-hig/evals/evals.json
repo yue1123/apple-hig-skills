@@ -1,0 +1,40 @@
+{
+  "skill_name": "apple-hig",
+  "evals": [
+    {
+      "id": 0,
+      "name": "port-android-screen-to-ios",
+      "prompt": "I've got a React Native screen that was designed by our Android dev and it looks off on iPhone. It's a settings-ish list: a ScrollView wrapped in <SafeAreaView style={{flex:1, backgroundColor:'#fff'}}>, rows are <TouchableOpacity style={{height: 56, paddingHorizontal: 16}}> with a Text at fontSize 16 color '#333' and a right-side chevron from react-native-vector-icons (MaterialIcons 'chevron-right', size 20). Header is a custom <View style={{height:56, backgroundColor:'#fff', borderBottomWidth:1, borderBottomColor:'#eee'}}> with a centered title. Can you fix it so it feels native on iOS? We're on RN 0.76 with react-navigation 7.",
+      "expected_output": "Identifies the SafeAreaView-as-outermost-element problem, replaces hex with PlatformColor semantic tokens (grouped background set for a settings list), swaps fixed row height for minHeight, replaces the custom header with a native-stack header (large title / headerTransparent + blur), swaps MaterialIcons chevron for SF Symbols chevron.right, sets 44pt hit targets, fixes lineHeight, and mentions Dynamic Type. Should cite specific HIG numbers.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "sheet-with-unsaved-changes",
+      "prompt": "Adding an 'Edit Profile' modal to our RN app (iOS + iPad). It needs a Done button that saves. What's the right way to present it and what do I need to handle?",
+      "expected_output": "Recommends native-stack formSheet/modal presentation with detents and a visible grabber; insists Done is paired with Cancel; covers intercepting swipe-to-dismiss via beforeRemove and confirming with an ACTION SHEET (not an alert) offering a save option; notes one-sheet-at-a-time and no nested navigator; notes iPad page/form sheet style; mentions title naming the task.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "tvos-focus-port",
+      "prompt": "We want to ship our RN iOS app on Apple TV. It's a media browsing app — horizontal rows of 300x170 poster cards, a bottom tab bar, and 17pt captions under each card. What has to change?",
+      "expected_output": "Explains react-native-tvos as a separate app/fork (no Expo); explains the focus engine (every element focusable, focus via scale+animation not color, five focus states, assets at focused size); computes spacing for focus growth; applies the 60/80pt overscan safe area manually; replaces the iOS type scale with the tvOS one (29pt body Medium, 23pt min) so 17pt captions are called out as unreadable; notes 66pt targets; notes tab bar scroll/pin behavior and Menu=parent-not-previous; mentions Top Shelf needs a Swift extension.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "liquid-glass-tab-bar",
+      "prompt": "How do I get that iOS 26 frosted glass look on my bottom tab bar in React Native? Right now I've got tabBarStyle: { backgroundColor: 'rgba(255,255,255,0.8)' } and it looks flat.",
+      "expected_output": "Explains Liquid Glass is not just blur (luminosity adaptation, specular highlights, content-driven light/dark flip are unreachable from JS); the correct answer is a native tab bar (react-native-bottom-tabs) rather than styling the JS one; says to REMOVE backgroundColor because it overrides the material; covers content scrolling under the bar + safe area padding; covers Reduce Transparency falling back to OPAQUE not weaker blur; covers Android using elevation instead of fake blur; mentions performance constraints.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "permission-and-accessibility-review",
+      "prompt": "Review this component for anything that'd get flagged in an App Store review or an accessibility audit:\n\nfunction PhotoPicker() {\n  useEffect(() => { ImagePicker.requestCameraPermissionsAsync(); }, []);\n  return (\n    <View>\n      <Text style={{fontSize: 10, color: '#999'}}>Add a photo</Text>\n      <TouchableOpacity onPress={pick} style={{width: 28, height: 28}}>\n        <Image source={cameraIcon} style={{width: 28, height: 28}} />\n      </TouchableOpacity>\n      <TouchableOpacity onPress={() => setEnabled(!enabled)}>\n        <View style={{width: 20, height: 20, backgroundColor: enabled ? 'green' : 'red'}} />\n      </TouchableOpacity>\n    </View>\n  );\n}",
+      "expected_output": "Flags: permission requested on mount rather than at point of use, and no denied-path handling / canAskAgain; missing NSCameraUsageDescription purpose string guidance; 10pt text below the 11pt iOS minimum and poor contrast; 28pt hit targets below 44pt (needs hitSlop); no accessibilityRole/accessibilityLabel on either button; icon inside button not hidden from a11y tree; state conveyed by color alone (green/red) with no shape or label; red/green being the classic colorblind failure pair; no accessibilityState. Should cite specific numbers.",
+      "files": []
+    }
+  ]
+}
