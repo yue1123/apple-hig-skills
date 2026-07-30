@@ -8,6 +8,11 @@ Models are good at React Native and vague about Apple. Ask for a settings screen
 
 This skill removes the approximating. **Never guess at a value** — hit targets, type scales, safe area insets, contrast ratios, spring behaviour. They're all in here, with the RN mapping next to them and a review checklist at the end of every file.
 
+> **[See the difference →](https://yue1123.github.io/apple-hig-skills/)**
+> Two settings screens side by side, one written with the skill and one without. They look identical
+> until you drag the Dynamic Type slider — at xxLarge, still inside the normal Text Size range, one of
+> them starts cutting text off. Source in [`docs/`](docs/index.html).
+
 ## Install
 
 Clone or download this repo, then:

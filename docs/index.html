@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What the apple-hig skill changes</title>
+<meta name="description" content="Drag a Dynamic Type slider and watch which of two React Native screens survives. A before/after demo of the apple-hig agent skill.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What the apple-hig skill changes">
+<meta property="og:description" content="Two React Native screens that look identical until you change a system setting.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%B1%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
+             "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+    --sans: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB",
+            "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+    --ink: #151a1f; --ink-2: #4a555e; --ink-3: #7d8890;
+    --paper: #f1f4f6; --card: #ffffff; --rule: #d9e0e4; --rule-soft: #e8edef;
+    --good: #14657f; --good-bg: #e4eff3;
+    --bad: #a4642f;  --bad-bg: #f7ebde;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e7ecee; --ink-2: #a7b3ba; --ink-3: #6d7b84;
+      --paper: #0e1317; --card: #161d22; --rule: #29333a; --rule-soft: #1f282e;
+      --good: #66bad6; --good-bg: #16323d; --bad: #dda471; --bad-bg: #33251a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e7ecee; --ink-2: #a7b3ba; --ink-3: #6d7b84;
+    --paper: #0e1317; --card: #161d22; --rule: #29333a; --rule-soft: #1f282e;
+    --good: #66bad6; --good-bg: #16323d; --bad: #dda471; --bad-bg: #33251a;
+  }
+  :root[data-theme="light"] {
+    --ink: #151a1f; --ink-2: #4a555e; --ink-3: #7d8890;
+    --paper: #f1f4f6; --card: #ffffff; --rule: #d9e0e4; --rule-soft: #e8edef;
+    --good: #14657f; --good-bg: #e4eff3; --bad: #a4642f; --bad-bg: #f7ebde;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 16px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Chinese needs more leading and a narrower measure to read well. */
+  html[lang="zh-CN"] body { line-height: 1.8; }
+  html[lang="zh-CN"] .prose { max-width: 38em; }
+  html[lang="zh-CN"] h1 { line-height: 1.28; letter-spacing: .005em; font-weight: 500; }
+  html[lang="zh-CN"] h2 { line-height: 1.4; font-weight: 500; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: clamp(24px,4vw,56px) clamp(16px,3vw,32px) 88px;
+          display: flex; flex-direction: column; gap: 44px; }
+  p { margin: 0; color: var(--ink-2); }
+  .prose { max-width: 64ch; display: flex; flex-direction: column; gap: 12px; }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px,4.4vw,42px);
+       line-height: 1.12; margin: 10px 0 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(20px,2.6vw,26px);
+       margin: 0; line-height: 1.25; text-wrap: balance; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em;
+             text-transform: uppercase; color: var(--ink-3); margin: 0; }
+  section { display: flex; flex-direction: column; gap: 18px; }
+  .sechead { border-top: 1px solid var(--rule); padding-top: 18px;
+             display: flex; flex-direction: column; gap: 8px; }
+  .sechead p { max-width: 74ch; }
+  html[lang="zh-CN"] .sechead p { max-width: 44em; }
+  .num { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--ink-3); margin: 0; }
+
+  .lang { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em;
+          color: var(--ink-3); margin: 0 0 10px; display: flex; gap: 8px; align-items: baseline; }
+  .lang button {
+    font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+    color: var(--good); text-decoration: none;
+  }
+  .lang button:hover { text-decoration: underline; }
+  .lang button:focus-visible { outline: 2px solid var(--good); outline-offset: 2px; border-radius: 2px; }
+  .lang button[aria-current="true"] { color: var(--ink); cursor: default; text-decoration: none; }
+
+  /* ---------- controls ---------- */
+  .panel { background: var(--card); border: 1px solid var(--rule); border-radius: 4px;
+           padding: 18px 20px; display: grid; gap: 16px 28px;
+           grid-template-columns: minmax(230px,1.15fr) minmax(250px,1fr); }
+  @media (max-width: 760px) { .panel { grid-template-columns: 1fr; } }
+  .panel.one { grid-template-columns: 1fr; }
+  .ctl { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .ctl-label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+               text-transform: uppercase; color: var(--ink-3);
+               display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  html[lang="zh-CN"] .ctl-label { font-family: var(--sans); font-size: 12px;
+                                  letter-spacing: .06em; text-transform: none; }
+  .ctl-val { color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums;
+             letter-spacing: 0; font-size: 10.5px; }
+  input[type=range] { width: 100%; accent-color: var(--good); margin: 0; }
+  input[type=range]:focus-visible { outline: 2px solid var(--good); outline-offset: 3px; }
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tog, .btn {
+    font: inherit; font-size: 13px; cursor: pointer; background: transparent; color: var(--ink-2);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 5px 13px;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .tog:hover, .btn:hover { border-color: var(--ink-3); }
+  .tog:focus-visible, .btn:focus-visible { outline: 2px solid var(--good); outline-offset: 2px; }
+  .tog .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); flex: none; }
+  .tog[aria-pressed="true"] { color: var(--ink); border-color: var(--good); background: var(--good-bg); }
+  .tog[aria-pressed="true"] .dot { background: var(--good); }
+  .btn { border-radius: 4px; color: var(--ink); }
+  .hint { font-size: 12.5px; color: var(--ink-3); grid-column: 1/-1; margin: 0; max-width: 88ch; }
+  html[lang="zh-CN"] .hint { max-width: 52em; line-height: 1.75; }
+  .hint code, .flag code, td code, footer code {
+    font-family: var(--mono); font-size: .88em; background: rgba(127,127,127,.15);
+    padding: 0 4px; border-radius: 2px; color: var(--ink);
+  }
+
+  /* ---------- stage ---------- */
+  .stage { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 26px; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .col-head { display: flex; flex-direction: column; gap: 3px; }
+  .col-tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
+  html[lang="zh-CN"] .col-tag { font-family: var(--sans); font-size: 12.5px; letter-spacing: .04em; text-transform: none; }
+  .col-a .col-tag { color: var(--bad); }
+  .col-b .col-tag { color: var(--good); }
+  .col-sub { font-size: 13px; color: var(--ink-3); }
+
+  .phone { border: 1px solid var(--rule); border-radius: 26px; padding: 8px; background: var(--card);
+           width: 408px; max-width: 100%; margin: 0 auto; }
+  .screen {
+    position: relative; height: 470px; overflow: hidden; border-radius: 19px;
+    /* the mockup uses the real system face: SF on Apple hardware, PingFang for Chinese */
+    font-family: -apple-system, system-ui, "PingFang SC", "Helvetica Neue", sans-serif;
+    line-height: normal;
+    --ios-grouped-bg: #f2f2f7; --ios-card: #ffffff;
+    --ios-label: #000000; --ios-label-2: rgba(60,60,67,.6); --ios-label-3: #c4c4c6;
+    --ios-separator: #c6c6c8; --ios-tint: #007aff; --ios-red: #ff3b30;
+    --ios-bar: rgba(249,249,249,.78); --ios-bar-opaque: #f9f9f9;
+    --ios-fill: rgba(120,120,128,.12); --ios-press: #d1d1d6;
+    --w-body: 400; --w-title: 700;
+  }
+  .screen.adaptive[data-appearance="dark"] {
+    --ios-grouped-bg: #000000; --ios-card: #1c1c1e;
+    --ios-label: #ffffff; --ios-label-2: rgba(235,235,245,.6); --ios-label-3: #48484a;
+    --ios-separator: #38383a; --ios-tint: #0a84ff; --ios-red: #ff453a;
+    --ios-bar: rgba(30,30,32,.76); --ios-bar-opaque: #1c1c1e;
+    --ios-fill: rgba(120,120,128,.24); --ios-press: #2c2c2e;
+  }
+  .screen.adaptive.contrast { --ios-label-2: rgba(60,60,67,.92); --ios-separator: #8e8e93; --ios-tint: #0040dd; }
+  .screen.adaptive.contrast[data-appearance="dark"] { --ios-label-2: rgba(235,235,245,.92); --ios-separator: #6e6e73; --ios-tint: #5ea9ff; }
+  .screen.bold { --w-body: 600; --w-title: 800; }
+
+  .body-scroll { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .list-a { background: #fff; padding: 56px 0 54px; }
+  .list-b { background: var(--ios-grouped-bg); padding: 60px 0 62px; min-height: 100%; }
+  .card-b { background: var(--ios-card); border-radius: 10px; margin: 0 16px; overflow: hidden; }
+
+  .hdr-js {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 3; height: 56px; overflow: hidden;
+    background: #fff; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: center; color: #000; font-weight: 600;
+  }
+  .hdr-native {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 3; padding: 7px 16px 9px;
+    background: var(--ios-bar); border-bottom: .5px solid var(--ios-separator); color: var(--ios-label);
+    -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+  }
+  .hdr-native .big { display: block; font-weight: var(--w-title); letter-spacing: -.021em; line-height: 1.16; }
+
+  .row { display: flex; align-items: center; gap: 10px; padding-inline: 16px; position: relative; }
+  .row-a { height: 56px; overflow: hidden; background: #fff; }
+  .row-b { min-height: 44px; padding-block: 11px; background: var(--ios-card); }
+  .row-a .lbl { color: #333; font-weight: 400; }   /* a literal weight: Bold Text can't reach it */
+  .row-b .lbl { color: var(--ios-label); flex-shrink: 1; font-weight: var(--w-body); }
+  .lbl { flex: 1 1 auto; min-width: 0; }
+  .sub { display: block; }
+  .row-a .sub { color: #999; }
+  .row-b .sub { color: var(--ios-label-2); }
+  .sep-a { height: 1px; background: #eee; margin-left: 16px; }
+  .sep-b { height: .5px; background: var(--ios-separator); margin-left: 16px; }
+  .row-tall { height: auto; padding-block: 14px; }
+
+  .row-a:active { opacity: .55; }                    /* Android-style fade */
+  .row-b:active { background: var(--ios-press); }    /* iOS-style fill */
+
+  .chev { flex: none; }
+  .chev-mat { stroke: #999; stroke-width: 2.5; }
+  .chev-sf { stroke: var(--ios-label-3); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+  .tabs { position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; display: flex; padding: 7px 0 9px; }
+  .tabs-fake { background: rgba(255,255,255,.8); border-top: 1px solid #eee; }
+  .tabs-native { background: var(--ios-bar); border-top: .5px solid var(--ios-separator);
+                 -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
+  .screen.opaque .hdr-native, .screen.opaque .tabs-native {
+    background: var(--ios-bar-opaque); -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .tab { flex: 1; text-align: center; font-size: 10px; line-height: 1.5; color: var(--ios-label-3); }
+  .tabs-fake .tab { color: #999; }
+  .tab.on { color: var(--ios-tint); }
+  .tabs-fake .tab.on { color: #007aff; }
+  .tab .g { display: block; font-size: 15px; line-height: 1.1; }
+
+  .icon-btn { flex: none; display: grid; place-items: center; border-radius: 6px;
+              background: var(--ios-fill); width: 28px; height: 28px; }
+  .icon-btn-b { position: relative; }
+  .icon-btn-b::after { content: ''; position: absolute; inset: -8px; }   /* hitSlop to 44 */
+  .hitring { position: absolute; z-index: 4; border: 1.5px solid; border-radius: 8px;
+             pointer-events: none; display: none; }
+  .screen.showHit .hitring { display: block; }
+  .hitring i { position: absolute; right: -1px; bottom: 100%; font-family: var(--mono);
+               font-size: 9px; font-style: normal; padding: 0 4px; border-radius: 3px 3px 0 0;
+               color: #fff; line-height: 1.7; white-space: nowrap; }
+  .hitring.bad { border-color: #ff3b30; }
+  .hitring.bad i { background: #ff3b30; }
+  .hitring.ok { border-color: #34c759; }
+  .hitring.ok i { background: #34c759; }
+
+  .a11y-box { position: absolute; z-index: 4; border: 2px solid var(--good); border-radius: 4px;
+              pointer-events: none; display: none; }
+  .screen.showA11y .a11y-box { display: block; }
+  .a11y-tag { position: absolute; left: -2px; top: 0; transform: translateY(-100%);
+              font-family: var(--mono); font-size: 9px; line-height: 1.6; padding: 1px 5px;
+              background: var(--good); color: #fff; border-radius: 3px 3px 0 0; white-space: nowrap; }
+  .a11y-box.miss { border-color: var(--bad); }
+  .a11y-box.miss .a11y-tag { background: var(--bad); }
+
+  /* ---------- alert / action sheet ---------- */
+  .scrim { position: absolute; inset: 0; z-index: 6; background: rgba(0,0,0,.22);
+           display: none; align-items: center; justify-content: center; }
+  .scrim.on { display: flex; }
+  .scrim.sheet { align-items: flex-end; padding: 8px; }
+  .alert {
+    width: 270px; border-radius: 14px; overflow: hidden; text-align: center;
+    background: rgba(248,248,248,.94); color: #000;
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    animation: pop .18s ease-out;
+  }
+  .alert h4 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
+  .alert .msg { margin: 3px 0 0; font-size: 13px; color: #000; line-height: 1.35; }
+  .alert .pad { padding: 19px 16px 15px; }
+  .alert .acts { display: flex; border-top: .5px solid rgba(60,60,67,.29); }
+  .alert .acts button { flex: 1; font: inherit; font-size: 17px; padding: 11px 4px;
+                        background: none; border: 0; color: #007aff; cursor: pointer; }
+  .alert .acts button + button { border-left: .5px solid rgba(60,60,67,.29); }
+  .alert .acts .danger { color: #ff3b30; font-weight: 600; }
+
+  .asheet { width: 100%; animation: rise .28s cubic-bezier(.32,.72,0,1); }
+  .asheet .grp { border-radius: 13px; overflow: hidden; background: rgba(248,248,248,.94);
+                 -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+  .asheet .grp + .grp { margin-top: 8px; }
+  .asheet .title { padding: 14px 16px; font-size: 13px; color: rgba(60,60,67,.6);
+                   text-align: center; border-bottom: .5px solid rgba(60,60,67,.29); line-height: 1.35; }
+  /* 20 pt label + 25 pt line + 16 pt padding = the HIG's 57 pt action-sheet row */
+  .asheet button { display: block; width: 100%; font: inherit; font-size: 20px; line-height: 25px;
+                   padding: 16px 8px; background: none; border: 0; color: #007aff; cursor: pointer;
+                   text-align: center; }
+  .asheet button + button { border-top: .5px solid rgba(60,60,67,.29); }
+  .asheet .danger { color: #ff3b30; }
+  .asheet .cancel { font-weight: 600; }
+  @keyframes pop  { from { transform: scale(1.14); opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes rise { from { transform: translateY(100%) } to { transform: none } }
+
+  .toast {
+    position: absolute; left: 12px; right: 12px; bottom: 62px; z-index: 7;
+    background: rgba(30,30,32,.92); color: #fff; border-radius: 12px; padding: 11px 14px;
+    display: none; align-items: center; gap: 10px; font-size: 14px;
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    animation: rise .24s cubic-bezier(.32,.72,0,1);
+  }
+  .toast.on { display: flex; }
+  .toast button { margin-left: auto; font: inherit; font-size: 15px; font-weight: 600;
+                  background: none; border: 0; color: #64d2ff; cursor: pointer; }
+
+  /* ---------- loading ---------- */
+  .spinner-wrap { position: absolute; inset: 0; z-index: 5; background: #fff; display: none;
+                  align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+  .spinner-wrap.on { display: flex; }
+  .spinner { width: 30px; height: 30px; border-radius: 50%;
+             border: 3px solid rgba(0,0,0,.12); border-top-color: #8e8e93;
+             animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .spinner-wrap span { font-size: 13px; color: #999; }
+
+  .sk { background: var(--ios-fill); border-radius: 6px; display: block; }
+  .sk.shimmer {
+    background-image: linear-gradient(100deg, transparent 20%, rgba(150,150,150,.28) 50%, transparent 80%);
+    background-size: 240% 100%; animation: sweep 1.3s ease-in-out infinite;
+  }
+  @keyframes sweep { from { background-position: 180% 0 } to { background-position: -80% 0 } }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* This page follows the rule it argues for. */
+    .alert, .asheet, .toast { animation: none; }
+    .sk.shimmer { animation: none; background-image: none; }
+    .spinner { animation-duration: 2.4s; }
+  }
+
+  /* ---------- flags ---------- */
+  .flags { display: flex; flex-direction: column; gap: 7px; }
+  .flag { font-size: 12.5px; line-height: 1.55; padding: 8px 11px; border-radius: 3px;
+          display: flex; gap: 9px; align-items: baseline; }
+  html[lang="zh-CN"] .flag { line-height: 1.72; }
+  .flag-bad { background: var(--bad-bg); color: var(--ink); box-shadow: inset 2px 0 0 var(--bad); }
+  .flag-good { background: var(--good-bg); color: var(--ink); box-shadow: inset 2px 0 0 var(--good); }
+  .flag .n { font-family: var(--mono); font-size: 11px; opacity: .75; flex: none; }
+  .quiet { font-size: 12.5px; color: var(--ink-3); padding: 8px 0; margin: 0; }
+
+  /* ---------- tables ---------- */
+  .scroller { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; min-width: 700px; }
+  th, td { text-align: left; padding: 10px 14px; font-size: 13.5px; vertical-align: top; line-height: 1.55; }
+  html[lang="zh-CN"] td.why, html[lang="zh-CN"] td.what { line-height: 1.72; }
+  thead th { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+             color: var(--ink-3); font-weight: 400; border-bottom: 1px solid var(--rule); }
+  html[lang="zh-CN"] thead th { font-family: var(--sans); font-size: 12px;
+                                letter-spacing: .04em; text-transform: none; }
+  thead th.ha { color: var(--bad); }
+  thead th.hb { color: var(--good); }
+  tbody tr + tr td { border-top: 1px solid var(--rule-soft); }
+  td.mono { font-family: var(--mono); font-size: 11.5px; white-space: pre-wrap; }
+  td.ca { color: var(--ink-2); }
+  td.cb { color: var(--ink); }
+  td.why { color: var(--ink-2); }
+  td.ref { font-family: var(--mono); font-size: 11px; color: var(--ink-3); white-space: pre-line; }
+  td.dm { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  footer { border-top: 1px solid var(--rule); padding-top: 18px; font-size: 12.5px; color: var(--ink-3); }
+  html[lang="zh-CN"] footer { line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="lang">
+      <button id="langEn" aria-current="true">English</button><span>·</span><button id="langZh">简体中文</button>
+    </p>
+    <p class="eyebrow" data-t="eyebrow"></p>
+    <h1 data-t="h1"></h1>
+    <div class="prose" style="margin-top:14px">
+      <p data-t="lede1"></p>
+      <p data-t="lede2"></p>
+    </div>
+  </header>
+
+  <!-- ============================ 01 ============================ -->
+  <section>
+    <div class="sechead">
+      <p class="num" data-t="d1num"></p>
+      <h2 data-t="d1h2"></h2>
+      <p style="font-size:14px" data-t="d1p"></p>
+    </div>
+
+    <div class="panel">
+      <div class="ctl">
+        <span class="ctl-label"><span data-t="dtLabel"></span><span class="ctl-val" id="dtVal"></span></span>
+        <input type="range" id="dt" min="0" max="11" step="1" value="3" data-t-aria="dtLabel">
+      </div>
+      <div class="ctl">
+        <span class="ctl-label"><span data-t="togLabel"></span></span>
+        <div class="toggles">
+          <button class="tog" id="tDark" aria-pressed="false"><span class="dot"></span><span data-t="tgDark"></span></button>
+          <button class="tog" id="tBold" aria-pressed="false"><span class="dot"></span><span data-t="tgBold"></span></button>
+          <button class="tog" id="tContrast" aria-pressed="false"><span class="dot"></span><span data-t="tgContrast"></span></button>
+          <button class="tog" id="tTrans" aria-pressed="false"><span class="dot"></span><span data-t="tgTrans"></span></button>
+          <button class="tog" id="tHit" aria-pressed="false"><span class="dot"></span><span data-t="tgHit"></span></button>
+          <button class="tog" id="tA11y" aria-pressed="false"><span class="dot"></span><span data-t="tgA11y"></span></button>
+        </div>
+      </div>
+      <p class="hint" data-t="d1hint"></p>
+    </div>
+
+    <div class="stage">
+      <div class="col col-a">
+        <div class="col-head"><span class="col-tag" data-t="tagA"></span><span class="col-sub" data-t="subA1"></span></div>
+        <div class="phone"><div class="screen" id="scrA">
+          <div class="body-scroll"><div class="list-a" id="listA"></div></div>
+          <div class="hdr-js" id="hdrA"><span id="hdrTitleA"></span></div>
+          <div class="tabs tabs-fake" id="tabsA"></div>
+          <div class="a11y-box miss" id="a11yA"><span class="a11y-tag" data-t="a11yTagA"></span></div>
+          <div class="hitring bad" id="hitA"><i>28 × 28</i></div>
+        </div></div>
+        <div class="flags" id="flagsA"></div>
+      </div>
+
+      <div class="col col-b">
+        <div class="col-head"><span class="col-tag" data-t="tagB"></span><span class="col-sub" data-t="subB1"></span></div>
+        <div class="phone"><div class="screen adaptive" id="scrB">
+          <div class="body-scroll"><div class="list-b"><div class="card-b" id="listB"></div></div></div>
+          <div class="hdr-native"><span class="big" id="hdrTitleB"></span></div>
+          <div class="tabs tabs-native" id="tabsB"></div>
+          <div class="a11y-box" id="a11yB"><span class="a11y-tag" data-t="a11yTagB"></span></div>
+          <div class="hitring ok" id="hitB"><i data-t="hitSlopTag"></i></div>
+        </div></div>
+        <div class="flags" id="flagsB"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2 data-t="diffH2"></h2></div>
+    <div class="scroller"><table id="diffTable"></table></div>
+  </section>
+
+  <!-- ============================ 02 ============================ -->
+  <section>
+    <div class="sechead">
+      <p class="num" data-t="d2num"></p>
+      <h2 data-t="d2h2"></h2>
+      <p style="font-size:14px" data-t="d2p"></p>
+    </div>
+    <div class="panel">
+      <div class="ctl">
+        <span class="ctl-label"><span data-t="tryIt"></span></span>
+        <div class="toggles">
+          <button class="btn" id="delA" data-t="d2btnA"></button>
+          <button class="btn" id="delB" data-t="d2btnB"></button>
+        </div>
+      </div>
+      <p class="hint" data-t="d2hint"></p>
+    </div>
+
+    <div class="stage">
+      <div class="col col-a">
+        <div class="col-head"><span class="col-tag" data-t="tagA"></span><span class="col-sub" data-t="subA2"></span></div>
+        <div class="phone"><div class="screen" id="scr2A">
+          <div class="body-scroll"><div class="list-a">
+            <div class="row row-a row-tall"><span class="lbl" style="font-size:16px" data-t="libItem"></span></div>
+            <div class="sep-a"></div>
+            <div class="row row-a row-tall">
+              <span class="lbl" style="font-size:16px;color:#d32f2f" data-t="libDelete"></span>
+            </div>
+          </div></div>
+          <div class="hdr-js" data-t="libTitle"></div>
+          <div class="scrim" id="scrim2A">
+            <div class="alert" role="alertdialog" aria-modal="true">
+              <div class="pad"><h4 data-t="alertTitle"></h4><p class="msg" data-t="alertMsg"></p></div>
+              <div class="acts">
+                <button data-close="scrim2A" data-t="cancel"></button>
+                <button class="danger" data-close="scrim2A" data-t="ok"></button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <div class="flags" id="flags2A"></div>
+      </div>
+
+      <div class="col col-b">
+        <div class="col-head"><span class="col-tag" data-t="tagB"></span><span class="col-sub" data-t="subB2"></span></div>
+        <div class="phone"><div class="screen adaptive" id="scr2B">
+          <div class="body-scroll"><div class="list-b"><div class="card-b">
+            <div class="row row-b">
+              <span class="lbl" style="font-size:17px;line-height:22px" data-t="libItem"></span>
+            </div>
+            <div class="sep-b"></div>
+            <div class="row row-b">
+              <span class="lbl" style="font-size:17px;line-height:22px;color:var(--ios-red)" data-t="libDelete"></span>
+            </div>
+          </div></div></div>
+          <div class="hdr-native"><span class="big" style="font-size:34px" data-t="libTitle"></span></div>
+          <div class="scrim sheet" id="scrim2B">
+            <div class="asheet" role="dialog" aria-modal="true">
+              <div class="grp">
+                <div class="title" data-t="sheetMsg"></div>
+                <button class="danger" data-undo="scrim2B" data-t="sheetDelete"></button>
+              </div>
+              <div class="grp"><button class="cancel" data-close="scrim2B" data-t="cancel"></button></div>
+            </div>
+          </div>
+          <div class="toast" id="toast2B"><span data-t="toastMsg"></span>
+            <button data-hide="toast2B" data-t="undo"></button></div>
+        </div></div>
+        <div class="flags" id="flags2B"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 03 ============================ -->
+  <section>
+    <div class="sechead">
+      <p class="num" data-t="d3num"></p>
+      <h2 data-t="d3h2"></h2>
+      <p style="font-size:14px" data-t="d3p"></p>
+    </div>
+    <div class="panel one">
+      <div class="ctl">
+        <span class="ctl-label"><span data-t="tryIt"></span></span>
+        <div class="toggles"><button class="btn" id="reload" data-t="d3btn"></button></div>
+      </div>
+      <p class="hint" data-t="d3hint"></p>
+    </div>
+
+    <div class="stage">
+      <div class="col col-a">
+        <div class="col-head"><span class="col-tag" data-t="tagA"></span><span class="col-sub" data-t="subA3"></span></div>
+        <div class="phone"><div class="screen" id="scr3A">
+          <div class="body-scroll"><div class="list-a" id="list3A"></div></div>
+          <div class="hdr-js" data-t="actTitle"></div>
+          <div class="spinner-wrap" id="spin3A"><div class="spinner"></div><span data-t="loading"></span></div>
+        </div></div>
+        <div class="flags" id="flags3A"></div>
+      </div>
+      <div class="col col-b">
+        <div class="col-head"><span class="col-tag" data-t="tagB"></span><span class="col-sub" data-t="subB3"></span></div>
+        <div class="phone"><div class="screen adaptive" id="scr3B">
+          <div class="body-scroll"><div class="list-b"><div class="card-b" id="list3B"></div></div></div>
+          <div class="hdr-native"><span class="big" style="font-size:34px" data-t="actTitle"></span></div>
+        </div></div>
+        <div class="flags" id="flags3B"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ index ============================ -->
+  <section>
+    <div class="sechead">
+      <p class="num" data-t="idxNum"></p>
+      <h2 data-t="idxH2"></h2>
+      <p style="font-size:14px" data-t="idxP"></p>
+    </div>
+    <div class="scroller"><table id="idxTable"></table></div>
+  </section>
+
+  <footer data-t="footer"></footer>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var frame = function (fn) { requestAnimationFrame(function () { requestAnimationFrame(fn); }); };
+
+  /* Dynamic Type step names are UIContentSizeCategory identifiers — not translated. */
+  var STEPS = [['xSmall',14],['Small',15],['Medium',16],['Large',17],['xLarge',19],['xxLarge',21],
+               ['xxxLarge',23],['AX1',28],['AX2',33],['AX3',40],['AX4',47],['AX5',53]];
+
+  var T = {
+    en: {
+      lang: 'en', title: 'What the apple-hig skill changes',
+      eyebrow: 'apple-hig skill · before / after',
+      h1: 'Both of these look fine on a factory-settings iPhone.',
+      lede1: 'That\'s what makes an HIG skill hard to demo. The screen a model writes without one ' +
+        'compiles, renders, ships, and passes a glance. It breaks when someone <em>changes a system ' +
+        'setting</em> — or when the app has to say something harder than “here is a list.”',
+      lede2: 'Three demos below. Each one starts out looking identical.',
+
+      d1num: '01 — A SETTINGS LIST',
+      d1h2: 'Change a system setting and one side stops working',
+      d1p: 'Left is valid React Native with Material metrics. Right is the same feature built to the HIG\'s numbers.',
+      dtLabel: 'Dynamic Type', togLabel: 'iPhone settings & overlays',
+      tgDark: 'Dark Mode', tgBold: 'Bold Text', tgContrast: 'Increase Contrast',
+      tgTrans: 'Reduce Transparency', tgHit: 'Show 44 pt targets', tgA11y: 'VoiceOver',
+      d1hint: 'Real iOS body sizes — 17 pt at Large, 53 pt at AX5. Both sides scale their text; ' +
+        '<code>allowFontScaling</code> is on by default. What differs is whether the container can grow ' +
+        'with it. The standard sizes still fit, so keep going into the <strong>AX</strong> steps — ' +
+        'Larger Accessibility Sizes, which far more people enable than most teams assume. These rows hold ' +
+        'only a title and a subtitle; a real row with a leading icon or a trailing badge breaks several ' +
+        'steps sooner. Press and hold a row to compare press feedback.',
+      dflt: 'default',
+
+      tagA: 'Without the skill', tagB: 'With the skill',
+      subA1: 'Valid React Native. Android metrics.',
+      subB1: 'Same feature. HIG metrics, semantic colour.',
+      tabs: ['Settings', 'Activity', 'Profile'],
+      a11yTagA: 'no role · no label', a11yTagB: 'button · “Privacy & Security”',
+      hitSlopTag: '44 × 44 · hitSlop',
+      rows: [['Account', 'Apple ID, iCloud, Payment'], ['Notifications', 'Sounds, Badges'],
+             ['Privacy & Security', 'Location, Tracking, Analytics'],
+             ['Display & Brightness', 'Text Size, Appearance']],
+
+      fClipA: 'Label <strong>clipped</strong> — <code>height: 56</code> can\'t grow, so the text is cut off. No wrap, no scroll, no warning.',
+      fClipB: 'Rows grew with the text. <code>minHeight: 44</code> plus padding, so nothing truncates.',
+      fHdrA: 'The title outgrew its own hand-rolled 56 pt bar and is clipped too.',
+      fHdrB: 'Large title grew with the text, as a real navigation bar does.',
+      fDarkA: 'Still light. <code>\'#fff\'</code> and <code>\'#333\'</code> are literals — they can\'t know about Dark Mode.',
+      fDarkB: 'Followed the appearance. <code>PlatformColor</code> resolves at runtime, not build time.',
+      fBoldA: 'Weight unchanged — Bold Text is a system setting this screen never reads.',
+      fBoldB: 'Text thickened, because the weight comes from the platform\'s text styles.',
+      fContA: 'Separators and secondary text unchanged; <code>#999</code> on white stays near 2.8:1.',
+      fContB: 'Secondary label, separator and tint all strengthened.',
+      fTransA: 'Bars still translucent — <code>rgba()</code> has no fallback, so the setting is silently ignored.',
+      fTransB: 'Material fell back to fully <strong>opaque</strong> — not a weaker blur.',
+      fHitA: 'The trailing button is <strong>28 × 28 pt</strong>, under the 44 pt minimum, with no <code>hitSlop</code>.',
+      fHitB: 'Same 28 pt glyph, but <code>hitSlop={8}</code> takes the touch area to 44 × 44.',
+      fA11yA: 'Rows expose no role and no label. VoiceOver reaches them and announces nothing useful.',
+      fA11yB: 'One focus stop per row, composed label, chevron hidden from the tree.',
+      quiet: 'No difference at this setting — that\'s the point.',
+
+      diffH2: 'The lines that differ',
+      diffHead: ['What', 'Without', 'With', 'Why it matters'],
+      diff: [
+        ['Row height', 'height: 56', 'minHeight: 44\npaddingVertical: 11',
+         'A fixed height clips text as soon as Dynamic Type grows. 44 pt is the minimum hit target, not the row height.'],
+        ['Label colour', "color: '#333'", "PlatformColor('label')",
+         "A literal can't follow Dark Mode or Increase Contrast, and drifts from Apple's value after an OS update."],
+        ['Font weight', '— default —', 'system text styles',
+         'Bold Text is a system setting. Text driven by the platform\'s styles thickens with it; a hard-coded weight ignores it.'],
+        ['Backgrounds', "backgroundColor: '#fff'", 'systemGroupedBackground\nsecondarySystemGroupedBackground',
+         'The grouped set is what makes a settings list read as iOS — grey page, elevated cards, inset separators.'],
+        ['Body size', 'fontSize: 16', 'fontSize: 17\nlineHeight: 22',
+         'iOS body is 17 pt; 16 is the Material value. Without explicit <code>lineHeight</code>, spacing drifts as text scales.'],
+        ['Label flex', '— none —', 'flexShrink: 1',
+         'Without it a long label at a large size pushes the chevron off the row instead of wrapping.'],
+        ['Icon button', 'width: 28, height: 28', 'hitSlop={8}',
+         '28 pt is the absolute floor, not the target. <code>hitSlop</code> reaches 44 pt without redrawing the glyph.'],
+        ['Press feedback', 'TouchableOpacity', 'Pressable + solid highlight',
+         'iOS rows highlight with a fill. The opacity fade is an Android/legacy idiom.'],
+        ['Outer element', '&lt;SafeAreaView style={{flex:1}}&gt;', 'insets = useSafeAreaInsets()\npaddingBottom: insets.bottom',
+         'As the outermost element it shrinks the frame, leaving a coloured band under the notch and stopping content short of the edges.'],
+        ['Header', '&lt;View height: 56\n  borderBottomWidth: 1&gt;',
+         "headerLargeTitle: true\nheaderTransparent: true\nheaderBlurEffect: 'systemMaterial'",
+         'A hand-rolled bar has a fixed height its own title will outgrow, and loses the material, the back-swipe and large-title collapse.'],
+        ['Tab bar', "tabBarStyle: {\n  backgroundColor:\n    'rgba(255,255,255,0.8)'\n}", 'react-native-bottom-tabs\n(no backgroundColor)',
+         "A translucent colour isn't a material — it doesn't blur, any <code>backgroundColor</code> overrides the real one, and it has no opaque fallback for Reduce Transparency."],
+        ['Accessibility', '— none —', 'accessibilityRole="button"\naccessibilityLabel={title}',
+         'An unlabelled control is unreachable by VoiceOver and Voice Control. The chevron is hidden so the row is one focus stop.']
+      ],
+
+      d2num: '02 — A DESTRUCTIVE ACTION',
+      d2h2: 'The same tap, asked two different ways',
+      d2p: 'Nothing here is a number. This one is pure convention — the kind of thing a model gets wrong ' +
+        'by reaching for whatever is shortest to write, and <code>Alert.alert</code> is one line.',
+      tryIt: 'Try it',
+      d2btnA: 'Delete, without the skill', d2btnB: 'Delete, with the skill',
+      d2hint: 'An <strong>alert</strong> interrupts — it\'s for the unexpected, and it arrives in the centre ' +
+        'of the screen having stopped everything. An <strong>action sheet</strong> answers: it rises from the ' +
+        'bottom where the thumb is, names the consequence on the button itself, and keeps Cancel a separate, ' +
+        'larger target. The HIG also asks for something the left side never offers — when an action is ' +
+        'reversible, don\'t confirm at all. Do it, and offer undo.',
+      subA2: 'Alert, ambiguous buttons, no undo.', subB2: 'Action sheet, named verb, undo.',
+      libTitle: 'Library', libItem: 'Reading List<span class="sub" style="font-size:12px">3 saved items</span>',
+      libItemB: 'Reading List<span class="sub" style="font-size:13px;line-height:18px">3 saved items</span>',
+      libDelete: 'Delete Reading List',
+      alertTitle: 'Are you sure?', alertMsg: 'This action cannot be undone.',
+      cancel: 'Cancel', ok: 'OK', undo: 'Undo',
+      sheetMsg: 'This will remove 3 saved items from all your devices.',
+      sheetDelete: 'Delete Reading List', toastMsg: 'Reading List deleted',
+      f2A: ['“Are you sure?” asks a question the person already answered by tapping, and names no consequence.',
+            '<strong>“OK”</strong> doesn\'t say what happens. The HIG asks for a verb — the button should read <code>Delete</code>.',
+            'An alert is for the <em>unexpected</em>. This was an intentional tap, so it\'s the wrong container.',
+            '“Cannot be undone” is a design decision presented as a fact. Undo was possible and wasn\'t built.'],
+      f2B: ['Rises from the bottom, where the thumb already is, instead of interrupting from the centre.',
+            'The button <strong>names the action</strong>, so you never read a title to learn what “OK” does.',
+            'The consequence is spelled out — how many items, and that it syncs everywhere.',
+            'Cancel is its own group, 57 pt tall and semibold: the safe choice is the easiest to hit.',
+            'Undo is offered <em>after</em> the fact, which the HIG prefers over asking first.'],
+
+      d3num: '03 — WAITING',
+      d3h2: 'Two ways to spend two seconds',
+      d3p: 'Both fetch the same data. One throws the screen away and tells you nothing; the other keeps ' +
+        'the layout you were already looking at.',
+      d3btn: 'Reload both',
+      d3hint: 'A full-screen spinner destroys context, gives no sense of progress, and makes the wait feel ' +
+        'longer than it is. A skeleton keeps the shape of the content so the eye can settle, and the layout ' +
+        'doesn\'t jump when data lands. The shimmer also stops under Reduce Motion — as does every animation ' +
+        'on this page.',
+      subA3: 'Full-screen ActivityIndicator.', subB3: 'Skeleton in the shape of the result.',
+      actTitle: 'Activity', loading: 'Loading…',
+      feed: [['Morning run', '5.2 km · 27 min'], ['Stand goal met', '12 of 12 hours'],
+             ['Weekly summary', 'Up 8% on last week']],
+      f3A: ['The screen you were reading is gone, replaced by nothing.',
+            'No sense of how much is left, and no partial content to start on.',
+            'It covers the navigation bar too, so you can\'t leave while it waits.'],
+      f3B: ['The structure is there before the content is, so nothing shifts on arrival.',
+            'Chrome stays put and stays interactive — you can still navigate away.',
+            'Shimmer stops under Reduce Motion instead of animating regardless.'],
+
+      idxNum: 'WHERE EACH FAILURE LIVES',
+      idxH2: 'Every one of these is a line in the skill',
+      idxP: '<code>SKILL.md</code> opens with a ranked list of the mistakes that most often make an RN app ' +
+        'look non-native. This page is that list, made touchable.',
+      idxHead: ['Demo', 'What breaks', 'Reference file'],
+      idx: [
+        ['01', 'Fixed row height truncates at large Dynamic Type', 'foundations/typography.md\ncomponents/layout-and-organization.md'],
+        ['01', 'Hard-coded hex ignores Dark Mode and Increase Contrast', 'foundations/color-and-materials.md\nrn/design-tokens.md'],
+        ['01', 'Hard-coded weight ignores Bold Text', 'foundations/typography.md'],
+        ['01', '28 pt target below the 44 pt minimum, no <code>hitSlop</code>', 'foundations/accessibility.md'],
+        ['01', '<code>SafeAreaView</code> as the outermost element', 'foundations/layout.md'],
+        ['01', 'Hand-rolled header instead of a native one', 'rn/navigation.md'],
+        ['01', '<code>backgroundColor</code> overriding the tab bar material; no opaque fallback', 'rn/liquid-glass.md\nrn/navigation.md'],
+        ['01', 'Opacity fade instead of a solid press highlight', 'rn/lists-and-performance.md'],
+        ['01', 'No role or label on an interactive row', 'foundations/accessibility.md'],
+        ['02', 'Alert used where an action sheet belongs', 'components/presentation.md'],
+        ['02', '“OK” instead of a named verb; consequence unstated', 'foundations/typography.md\npatterns/feedback-and-loading.md'],
+        ['02', 'Confirmation asked where undo was possible', 'patterns/feedback-and-loading.md'],
+        ['03', 'Full-screen spinner instead of a skeleton', 'patterns/feedback-and-loading.md'],
+        ['03', 'Animation that ignores Reduce Motion', 'foundations/motion.md']
+      ],
+      footer: 'A simulation built in CSS, not a device screenshot — real <code>PlatformColor</code>, ' +
+        '<code>UIBlurEffect</code> and VoiceOver behave as shown but must be verified on device. The type ' +
+        'sizes, the 44 pt target, the alert and action-sheet metrics and the grouped colour set are the ' +
+        'HIG\'s published values. Source: <code>docs/index.html</code>.'
+    },
+
+    'zh-CN': {
+      lang: 'zh-CN', title: 'apple-hig skill 改变了什么',
+      eyebrow: 'apple-hig skill · 改动前后对比',
+      h1: '这两个界面在出厂设置的 iPhone 上都很正常。',
+      lede1: '这正是 HIG skill 难以演示的地方。不带 skill 写出的界面能编译、能渲染、能上线，扫一眼也没问题。' +
+        '它只在有人<em>改动某个系统设置</em>时崩掉 —— 或者在这个 App 需要表达比「这里有一个列表」更难的事情时。',
+      lede2: '下面三个演示，每一个的起点都长得一模一样。',
+
+      d1num: '01 — 一个设置列表',
+      d1h2: '改一个系统设置，其中一侧就不工作了',
+      d1p: '左侧是合法的 React Native，用的是 Material 的度量。右侧是同一个功能，按 HIG 的数值实现。',
+      dtLabel: 'Dynamic Type 字号', togLabel: 'iPhone 系统设置与叠加层',
+      tgDark: '深色模式', tgBold: '粗体文本', tgContrast: '增强对比度',
+      tgTrans: '降低透明度', tgHit: '显示 44 pt 命中区', tgA11y: 'VoiceOver',
+      d1hint: '这些是真实的 iOS 正文尺寸 —— Large 档 17 pt，AX5 档 53 pt。两侧的文字都会缩放，' +
+        '<code>allowFontScaling</code> 默认开启；区别在于容器能否跟着长大。普通档位还撑得住，' +
+        '继续拖到 <strong>AX</strong> 那几档 —— 也就是「更大字体」，开启它的人比多数团队预估的多得多。' +
+        '另外注意：中文界面比英文<strong>更早一档</strong>崩掉（AX1 对 AX2），因为 CJK 字体的行高更大 —— ' +
+        '这意味着只在英文下测试，会更晚发现这个问题。这里的行只有标题和副标题；真实的行若带前置图标或' +
+        '尾部徽标，会提前好几档就崩。长按任意一行可以对比按压反馈。',
+      dflt: '默认',
+
+      tagA: '不带 skill', tagB: '带 skill',
+      subA1: '合法的 React Native，Material 度量。',
+      subB1: '同一功能，HIG 度量与语义色。',
+      tabs: ['设置', '活动', '个人'],
+      a11yTagA: '无 role · 无 label', a11yTagB: 'button · 「隐私与安全性」',
+      hitSlopTag: '44 × 44 · hitSlop',
+      rows: [['账户', 'Apple 账户、iCloud、付款'], ['通知', '声音、标记'],
+             ['隐私与安全性', '定位、跟踪、分析'],
+             ['显示与亮度', '文字大小、外观']],
+
+      fClipA: '标签被<strong>裁切</strong> —— <code>height: 56</code> 无法长大，文字直接被切掉。不换行、不滚动、没有任何提示。',
+      fClipB: '行随文字一起长高了。<code>minHeight: 44</code> 加内边距，所以不会截断。',
+      fHdrA: '标题也长过了自己那个手搓的 56 pt 导航栏，同样被裁掉。',
+      fHdrB: '大标题随文字一起变大，就像真正的导航栏那样。',
+      fDarkA: '仍然是浅色。<code>\'#fff\'</code> 和 <code>\'#333\'</code> 是字面量 —— 它们无法知道深色模式的存在。',
+      fDarkB: '跟随了系统外观。<code>PlatformColor</code> 在运行时解析，而不是构建时。',
+      fBoldA: '字重没变 —— 粗体文本是一个系统设置，而这个界面从不读取它。',
+      fBoldB: '文字变粗了，因为字重来自平台自己的文本样式。',
+      fContA: '分隔线和次级文字都没变；白底上的 <code>#999</code> 依然停在 2.8:1 左右。',
+      fContB: '次级文字、分隔线和 tint 全部加强了。',
+      fTransA: '两条栏仍是半透明 —— <code>rgba()</code> 没有回退方案，这个设置被静默忽略了。',
+      fTransB: '材质回退为完全<strong>不透明</strong> —— 而不是变成更弱的模糊。',
+      fHitA: '尾部那个按钮是 <strong>28 × 28 pt</strong>，低于 44 pt 最小值，而且没有 <code>hitSlop</code>。',
+      fHitB: '同样是 28 pt 的图标，但 <code>hitSlop={8}</code> 把触摸区域撑到了 44 × 44。',
+      fA11yA: '这些行不暴露任何 role 和 label。VoiceOver 能聚焦到它们，却读不出有用的信息。',
+      fA11yB: '每行一个焦点停靠点，标签由内容组合而成，chevron 从无障碍树中隐藏。',
+      quiet: '在这个设置下没有差别 —— 这正是要说明的问题。',
+
+      diffH2: '真正不同的那几行代码',
+      diffHead: ['项目', '不带 skill', '带 skill', '为什么重要'],
+      diff: [
+        ['行高', 'height: 56', 'minHeight: 44\npaddingVertical: 11',
+         '固定高度会在 Dynamic Type 变大时立刻裁切文字。44 pt 是最小命中区，不是行高。'],
+        ['文字颜色', "color: '#333'", "PlatformColor('label')",
+         '字面量无法跟随深色模式或增强对比度，而且会在系统更新后与 Apple 的取值逐渐偏离。'],
+        ['字重', '— 默认 —', '系统文本样式',
+         '粗体文本是系统设置。由平台文本样式驱动的文字会跟着变粗；硬编码的字重则完全忽略它。'],
+        ['背景色', "backgroundColor: '#fff'", 'systemGroupedBackground\nsecondarySystemGroupedBackground',
+         'grouped 色组才是让设置类列表读起来像 iOS 的关键 —— 灰色页面、抬升的卡片、内缩的分隔线。'],
+        ['正文字号', 'fontSize: 16', 'fontSize: 17\nlineHeight: 22',
+         'iOS 正文是 17 pt，16 是 Material 的值。不显式设置 <code>lineHeight</code>，字号缩放时行距就会漂移。'],
+        ['标签伸缩', '— 无 —', 'flexShrink: 1',
+         '没有它，大字号下的长标签会把 chevron 挤出行外，而不是自己换行。'],
+        ['图标按钮', 'width: 28, height: 28', 'hitSlop={8}',
+         '28 pt 是绝对下限，不是目标值。<code>hitSlop</code> 能在不重绘图标的前提下达到 44 pt。'],
+        ['按压反馈', 'TouchableOpacity', 'Pressable + 实色高亮',
+         'iOS 的行用填充色高亮。整体淡出是 Android / 早期 RN 的习惯。'],
+        ['最外层元素', '&lt;SafeAreaView style={{flex:1}}&gt;', 'insets = useSafeAreaInsets()\npaddingBottom: insets.bottom',
+         '作为最外层元素，它会收缩整个画面，在刘海下留出一条色带，并让内容停在屏幕边缘之前。'],
+        ['导航栏', '&lt;View height: 56\n  borderBottomWidth: 1&gt;',
+         "headerLargeTitle: true\nheaderTransparent: true\nheaderBlurEffect: 'systemMaterial'",
+         '手搓的栏有一个自己的标题都会长过的固定高度，同时丢掉材质、返回手势和大标题折叠。'],
+        ['Tab bar', "tabBarStyle: {\n  backgroundColor:\n    'rgba(255,255,255,0.8)'\n}", 'react-native-bottom-tabs\n（不设 backgroundColor）',
+         '半透明颜色不是材质 —— 它不做模糊，任何 <code>backgroundColor</code> 都会覆盖真正的材质，而且它对「降低透明度」没有不透明回退。'],
+        ['无障碍', '— 无 —', 'accessibilityRole="button"\naccessibilityLabel={title}',
+         '没有标签的控件对 VoiceOver 和「语音控制」都不可达。chevron 被隐藏，这样整行才是一个焦点停靠点。']
+      ],
+
+      d2num: '02 — 一个破坏性操作',
+      d2h2: '同一次点击，两种问法',
+      d2p: '这里没有任何数值，纯粹是惯例 —— 也正是模型最容易做错的地方：它会选最短的写法，而 ' +
+        '<code>Alert.alert</code> 只要一行。',
+      tryIt: '试一下',
+      d2btnA: '点「删除」（不带 skill）', d2btnB: '点「删除」（带 skill）',
+      d2hint: '<strong>alert</strong> 是打断 —— 它是留给意外情况的，出现在屏幕正中，并且已经让一切停下。' +
+        '<strong>action sheet</strong> 是回应：它从拇指所在的底部升起，把后果直接写在按钮上，并让「取消」' +
+        '保持为一个独立、更大的目标。HIG 还要求了一件左侧从未提供的事 —— 当操作可以撤销时，根本不要确认。' +
+        '直接执行，然后提供撤销。',
+      subA2: 'Alert、含义不明的按钮、无撤销。', subB2: 'Action sheet、动词明确、可撤销。',
+      libTitle: '资源库', libItem: '阅读列表<span class="sub" style="font-size:12px">已保存 3 项</span>',
+      libItemB: '阅读列表<span class="sub" style="font-size:13px;line-height:18px">已保存 3 项</span>',
+      libDelete: '删除阅读列表',
+      alertTitle: '确定吗？', alertMsg: '此操作无法撤销。',
+      cancel: '取消', ok: '好', undo: '撤销',
+      sheetMsg: '这会从你的所有设备上移除已保存的 3 项内容。',
+      sheetDelete: '删除阅读列表', toastMsg: '已删除阅读列表',
+      f2A: ['「确定吗？」问的是用户刚刚用点击回答过的问题，而且没有说明任何后果。',
+            '<strong>「好」</strong>没有说会发生什么。HIG 要求用动词 —— 这个按钮应该写<code>删除</code>。',
+            'alert 是留给<em>意外</em>的。这是一次有意的点击，所以容器选错了。',
+            '「无法撤销」是一个被当成事实陈述的设计决定。撤销原本可以做，只是没做。'],
+      f2B: ['从拇指已经所在的底部升起，而不是从屏幕正中打断。',
+            '按钮<strong>直接写明操作</strong>，你无需读标题才能知道「好」会做什么。',
+            '后果被明确写出 —— 多少项内容，以及它会同步到所有设备。',
+            '「取消」自成一组，57 pt 高、半粗体：最安全的选择也最容易点到。',
+            '撤销是在操作<em>之后</em>提供的，这正是 HIG 相比事前确认更推荐的做法。'],
+
+      d3num: '03 — 等待',
+      d3h2: '花掉两秒钟的两种方式',
+      d3p: '两侧拉取的是同一份数据。一侧把整个界面丢掉、什么也不告诉你；另一侧保留了你本来正在看的布局。',
+      d3btn: '两侧同时重新加载',
+      d3hint: '全屏 spinner 摧毁上下文、不提供任何进度感，还会让等待显得比实际更久。骨架屏保留了内容的形状，' +
+        '让视线可以先安顿下来，数据落地时布局也不会跳动。骨架的微光在「减弱动态效果」下也会停止 —— ' +
+        '本页所有动画都是如此。',
+      subA3: '全屏 ActivityIndicator。', subB3: '与结果同形的骨架屏。',
+      actTitle: '活动', loading: '加载中…',
+      feed: [['晨间跑步', '5.2 公里 · 27 分钟'], ['站立目标已达成', '12 / 12 小时'],
+             ['本周汇总', '比上周提高 8%']],
+      f3A: ['你正在读的界面消失了，取而代之的是一片空白。',
+            '不知道还剩多少，也没有任何局部内容可以先看。',
+            '它把导航栏也一起盖住了，所以等待期间你无法离开。'],
+      f3B: ['内容还没到，结构已经在了，所以数据落地时没有任何位移。',
+            'Chrome 保持原位且仍可交互 —— 你随时可以离开。',
+            '微光在「减弱动态效果」下会停止，而不是照样播放。'],
+
+      idxNum: '每个失效点出自哪里',
+      idxH2: '上面每一处失效，都是 skill 里的一行',
+      idxP: '<code>SKILL.md</code> 开篇就是一份按频率排序的清单：最常让 RN 应用显得不原生的那些错误。' +
+        '这个页面就是那份清单，只是变成了可以动手点的。',
+      idxHead: ['演示', '失效点', '参考文件'],
+      idx: [
+        ['01', '固定行高在大号 Dynamic Type 下截断文字', 'foundations/typography.md\ncomponents/layout-and-organization.md'],
+        ['01', '硬编码 hex 忽略深色模式与增强对比度', 'foundations/color-and-materials.md\nrn/design-tokens.md'],
+        ['01', '硬编码字重忽略粗体文本', 'foundations/typography.md'],
+        ['01', '28 pt 命中区低于 44 pt 最小值，且无 <code>hitSlop</code>', 'foundations/accessibility.md'],
+        ['01', '<code>SafeAreaView</code> 作为最外层元素', 'foundations/layout.md'],
+        ['01', '手搓导航栏而非使用原生的', 'rn/navigation.md'],
+        ['01', '<code>backgroundColor</code> 覆盖 tab bar 材质；无不透明回退', 'rn/liquid-glass.md\nrn/navigation.md'],
+        ['01', '整体淡出而非实色按压高亮', 'rn/lists-and-performance.md'],
+        ['01', '可交互的行缺少 role 与 label', 'foundations/accessibility.md'],
+        ['02', '该用 action sheet 的地方用了 alert', 'components/presentation.md'],
+        ['02', '用「好」而非明确的动词；后果未说明', 'foundations/typography.md\npatterns/feedback-and-loading.md'],
+        ['02', '本可撤销却要求事前确认', 'patterns/feedback-and-loading.md'],
+        ['03', '用全屏 spinner 而非骨架屏', 'patterns/feedback-and-loading.md'],
+        ['03', '动画忽略「减弱动态效果」', 'foundations/motion.md']
+      ],
+      footer: '这是用 CSS 做的模拟，不是设备截图 —— 真实的 <code>PlatformColor</code>、' +
+        '<code>UIBlurEffect</code> 和 VoiceOver 的行为与此处展示一致，但仍需在真机上验证。' +
+        '文字尺寸、44 pt 命中区、alert 与 action sheet 的度量、以及 grouped 色组，都是 HIG 公布的数值。' +
+        '源码：<code>docs/index.html</code>。'
+    }
+  };
+
+  var L = 'en', d = T.en;
+
+  /* ---------- language ---------- */
+  function setLang(code, push) {
+    L = T[code] ? code : 'en';
+    d = T[L];
+    document.documentElement.lang = d.lang;
+    document.title = d.title;
+    $('langEn').setAttribute('aria-current', String(L === 'en'));
+    $('langZh').setAttribute('aria-current', String(L === 'zh-CN'));
+    var nodes = document.querySelectorAll('[data-t]');
+    for (var i = 0; i < nodes.length; i++) {
+      var k = nodes[i].getAttribute('data-t');
+      if (d[k] != null) nodes[i].innerHTML = d[k];
+    }
+    var arias = document.querySelectorAll('[data-t-aria]');
+    for (var j = 0; j < arias.length; j++) {
+      arias[j].setAttribute('aria-label', d[arias[j].getAttribute('data-t-aria')]);
+    }
+    // the right column's list item needs the larger subtitle size
+    document.querySelectorAll('#scr2B [data-t="libItem"]').forEach(function (el) {
+      el.innerHTML = d.libItemB;
+    });
+    renderTabs(); renderTables(); renderStaticFlags(); renderFeed();
+    build();
+    if (push) {
+      try {
+        var u = new URL(location.href);
+        u.searchParams.set('lang', L);
+        history.replaceState(null, '', u);
+        localStorage.setItem('hig-demo-lang', L);
+      } catch (e) { /* file:// or storage blocked — ignore */ }
+    }
+  }
+  $('langEn').addEventListener('click', function () { setLang('en', true); });
+  $('langZh').addEventListener('click', function () { setLang('zh-CN', true); });
+
+  /* ---------- shared bits ---------- */
+  function renderTabs() {
+    ['tabsA', 'tabsB'].forEach(function (id) {
+      $(id).innerHTML = d.tabs.map(function (t, i) {
+        var g = ['☰', '◔', '☺'][i];
+        return '<span class="tab' + (i === 0 ? ' on' : '') + '"><span class="g">' + g + '</span>' + t + '</span>';
+      }).join('');
+    });
+  }
+
+  function renderTables() {
+    $('diffTable').innerHTML =
+      '<thead><tr><th>' + d.diffHead[0] + '</th><th class="ha">' + d.diffHead[1] +
+      '</th><th class="hb">' + d.diffHead[2] + '</th><th>' + d.diffHead[3] + '</th></tr></thead><tbody>' +
+      d.diff.map(function (r) {
+        return '<tr><td class="what">' + r[0] + '</td><td class="mono ca">' + r[1] +
+               '</td><td class="mono cb">' + r[2] + '</td><td class="why">' + r[3] + '</td></tr>';
+      }).join('') + '</tbody>';
+
+    $('idxTable').innerHTML =
+      '<thead><tr><th>' + d.idxHead[0] + '</th><th>' + d.idxHead[1] + '</th><th>' + d.idxHead[2] +
+      '</th></tr></thead><tbody>' +
+      d.idx.map(function (r) {
+        return '<tr><td class="dm">' + r[0] + '</td><td class="what">' + r[1] +
+               '</td><td class="ref">' + r[2] + '</td></tr>';
+      }).join('') + '</tbody>';
+  }
+
+  function flagList(el, items, cls) {
+    $(el).innerHTML = items.map(function (x) {
+      return '<div class="flag ' + cls + '"><span class="n">' + (cls === 'flag-bad' ? '✕' : '✓') +
+             '</span><span>' + x + '</span></div>';
+    }).join('');
+  }
+  function renderStaticFlags() {
+    flagList('flags2A', d.f2A, 'flag-bad'); flagList('flags2B', d.f2B, 'flag-good');
+    flagList('flags3A', d.f3A, 'flag-bad'); flagList('flags3B', d.f3B, 'flag-good');
+  }
+
+  /* ---------- demo 1 ---------- */
+  var LONGEST = 2;
+  var dt = $('dt'), dtVal = $('dtVal');
+  var scrA = $('scrA'), scrB = $('scrB'), listA = $('listA'), listB = $('listB');
+  var hdrTitleA = $('hdrTitleA'), hdrTitleB = $('hdrTitleB');
+  var st = { dark: false, bold: false, contrast: false, opaque: false, hit: false, a11y: false };
+
+  function chev(sf) {
+    var w = sf ? 15 : 20, p = sf ? 'M9 4.5l6 7.5-6 7.5' : 'M8 5l7 7-7 7';
+    return '<svg class="chev ' + (sf ? 'chev-sf' : 'chev-mat') + '" width="' + w + '" height="' + w +
+           '" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="' + p + '"/></svg>';
+  }
+  function gear(extra) {
+    return '<span class="icon-btn ' + extra + '" aria-hidden="true">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2">' +
+      '<circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2"/>' +
+      '</svg></span>';
+  }
+
+  function build() {
+    var i = +dt.value, pt = STEPS[i][1];
+    dtVal.textContent = STEPS[i][0] + ' · ' + pt + ' pt' + (i === 3 ? ' · ' + d.dflt : '');
+    var ptA = Math.round(pt * 16 / 17);
+    var subA = Math.round(ptA * 12 / 16), subB = Math.round(pt * 13 / 17);
+
+    var a = '', b = '';
+    d.rows.forEach(function (r, n) {
+      var last = n === d.rows.length - 1;
+      a += '<div class="row row-a"><span class="lbl" style="font-size:' + ptA + 'px">' + r[0] +
+           '<span class="sub" style="font-size:' + subA + 'px">' + r[1] + '</span></span>' +
+           (last ? gear('') : chev(false)) + '</div>' + (last ? '' : '<div class="sep-a"></div>');
+      b += '<div class="row row-b"><span class="lbl" style="font-size:' + pt + 'px;line-height:' +
+           Math.round(pt * 22 / 17) + 'px">' + r[0] + '<span class="sub" style="font-size:' + subB +
+           'px;line-height:' + Math.round(subB * 18 / 13) + 'px">' + r[1] + '</span></span>' +
+           (last ? gear('icon-btn-b') : chev(true)) + '</div>' + (last ? '' : '<div class="sep-b"></div>');
+    });
+    listA.innerHTML = a; listB.innerHTML = b;
+    hdrTitleA.textContent = d.tabs[0]; hdrTitleB.textContent = d.tabs[0];
+    hdrTitleA.style.fontSize = Math.round(ptA * 17 / 16) + 'px';
+    hdrTitleB.style.fontSize = Math.round(pt * 34 / 17) + 'px';
+
+    frame(function () { measure(); place(); });
+  }
+
+  function measure() {
+    var A = [], B = [];
+    var rows = listA.querySelectorAll('.row-a'), worst = 0;
+    for (var k = 0; k < rows.length; k++) {
+      var l = rows[k].querySelector('.lbl');
+      worst = Math.max(worst, l.scrollHeight - rows[k].clientHeight);
+    }
+    if (worst > 1) { A.push(d.fClipA); B.push(d.fClipB); }
+    if (hdrTitleA.scrollHeight - $('hdrA').clientHeight > 1) { A.push(d.fHdrA); B.push(d.fHdrB); }
+    if (st.dark) { A.push(d.fDarkA); B.push(d.fDarkB); }
+    if (st.bold) { A.push(d.fBoldA); B.push(d.fBoldB); }
+    if (st.contrast) { A.push(d.fContA); B.push(d.fContB); }
+    if (st.opaque) { A.push(d.fTransA); B.push(d.fTransB); }
+    if (st.hit) { A.push(d.fHitA); B.push(d.fHitB); }
+    if (st.a11y) { A.push(d.fA11yA); B.push(d.fA11yB); }
+    if (!A.length) {
+      $('flagsA').innerHTML = '<p class="quiet">' + d.quiet + '</p>';
+      $('flagsB').innerHTML = '<p class="quiet">' + d.quiet + '</p>';
+    } else {
+      flagList('flagsA', A, 'flag-bad'); flagList('flagsB', B, 'flag-good');
+    }
+  }
+
+  function place() {
+    [[$('a11yA'), scrA, '.row-a'], [$('a11yB'), scrB, '.row-b']].forEach(function (t) {
+      var box = t[0], scr = t[1], rows = scr.querySelectorAll(t[2]), row = rows[LONGEST];
+      if (!row) { box.style.visibility = 'hidden'; return; }
+      var r = row.getBoundingClientRect(), s = scr.getBoundingClientRect();
+      box.style.visibility = 'visible';
+      box.style.left = (r.left - s.left + 2) + 'px';
+      box.style.top = (r.top - s.top) + 'px';
+      box.style.width = (r.width - 4) + 'px';
+      box.style.height = r.height + 'px';
+    });
+    [[$('hitA'), scrA, 28], [$('hitB'), scrB, 44]].forEach(function (t) {
+      var ring = t[0], scr = t[1], size = t[2], btn = scr.querySelector('.icon-btn');
+      if (!btn) { ring.style.visibility = 'hidden'; return; }
+      var r = btn.getBoundingClientRect(), s = scr.getBoundingClientRect();
+      var cx = r.left - s.left + r.width / 2, cy = r.top - s.top + r.height / 2;
+      ring.style.visibility = 'visible';
+      ring.style.width = size + 'px'; ring.style.height = size + 'px';
+      ring.style.left = (cx - size / 2) + 'px'; ring.style.top = (cy - size / 2) + 'px';
+    });
+  }
+
+  function tog(id, key, apply) {
+    $(id).addEventListener('click', function () {
+      st[key] = !st[key];
+      this.setAttribute('aria-pressed', String(st[key]));
+      if (apply) apply(st[key]);
+      build();
+    });
+  }
+  dt.addEventListener('input', build);
+  tog('tDark', 'dark', function (on) { scrB.setAttribute('data-appearance', on ? 'dark' : 'light'); });
+  tog('tBold', 'bold', function (on) { scrB.classList.toggle('bold', on); });
+  tog('tContrast', 'contrast', function (on) { scrB.classList.toggle('contrast', on); });
+  tog('tTrans', 'opaque', function (on) { scrB.classList.toggle('opaque', on); });
+  tog('tHit', 'hit', function (on) { scrA.classList.toggle('showHit', on); scrB.classList.toggle('showHit', on); });
+  tog('tA11y', 'a11y', function (on) { scrA.classList.toggle('showA11y', on); scrB.classList.toggle('showA11y', on); });
+  window.addEventListener('resize', place);
+  [scrA, scrB].forEach(function (s) {
+    s.querySelector('.body-scroll').addEventListener('scroll', place, { passive: true });
+  });
+
+  /* ---------- demo 2 ---------- */
+  $('delA').addEventListener('click', function () { $('scrim2A').classList.add('on'); });
+  $('delB').addEventListener('click', function () { $('scrim2B').classList.add('on'); });
+  document.addEventListener('click', function (e) {
+    var s = e.target.dataset;
+    if (!s) return;
+    if (s.close) $(s.close).classList.remove('on');
+    if (s.undo) { $(s.undo).classList.remove('on'); $('toast2B').classList.add('on'); }
+    if (s.hide) $(s.hide).classList.remove('on');
+  });
+  ['scrim2A', 'scrim2B'].forEach(function (id) {
+    $(id).addEventListener('click', function (e) { if (e.target === this) this.classList.remove('on'); });
+  });
+
+  /* ---------- demo 3 ---------- */
+  function feedA() {
+    return d.feed.map(function (r, n) {
+      return '<div class="row row-a row-tall"><span class="lbl" style="font-size:16px">' + r[0] +
+             '<span class="sub" style="font-size:12px">' + r[1] + '</span></span></div>' +
+             (n < d.feed.length - 1 ? '<div class="sep-a"></div>' : '');
+    }).join('');
+  }
+  function feedB(loaded) {
+    return d.feed.map(function (r, n) {
+      var body = loaded
+        ? '<span class="lbl" style="font-size:17px;line-height:22px">' + r[0] +
+          '<span class="sub" style="font-size:13px;line-height:18px">' + r[1] + '</span></span>'
+        : '<span class="lbl"><span class="sk shimmer" style="width:' + (58 - n * 9) +
+          '%;height:17px"></span><span class="sk shimmer" style="width:' + (40 - n * 6) +
+          '%;height:13px;margin-top:6px"></span></span>';
+      return '<div class="row row-b">' + body + '</div>' +
+             (n < d.feed.length - 1 ? '<div class="sep-b"></div>' : '');
+    }).join('');
+  }
+  var timer = null;
+  function renderFeed() { $('list3A').innerHTML = feedA(); $('list3B').innerHTML = feedB(true); }
+  $('reload').addEventListener('click', function () {
+    if (timer) clearTimeout(timer);
+    $('spin3A').classList.add('on');
+    $('list3B').innerHTML = feedB(false);
+    timer = setTimeout(function () {
+      $('spin3A').classList.remove('on');
+      $('list3B').innerHTML = feedB(true);
+    }, 2000);
+  });
+
+  /* ---------- boot ---------- */
+  ['scrA', 'scrB', 'scr2B', 'scr3B'].forEach(function (id) {
+    $(id).setAttribute('data-appearance', 'light');
+  });
+  var initial = 'en';
+  try {
+    var q = new URL(location.href).searchParams.get('lang');
+    var saved = localStorage.getItem('hig-demo-lang');
+    if (q && T[q]) initial = q;
+    else if (saved && T[saved]) initial = saved;
+    else if (/^zh/i.test(navigator.language || '')) initial = 'zh-CN';
+  } catch (e) {
+    if (/^zh/i.test(navigator.language || '')) initial = 'zh-CN';
+  }
+  setLang(initial, false);
+})();
+</script>
+</body>
+</html>
