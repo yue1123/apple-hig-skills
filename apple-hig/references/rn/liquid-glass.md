@@ -64,6 +64,34 @@ import { createNativeBottomTabNavigator } from 'react-native-bottom-tabs/react-n
 
 **Do not set a `backgroundColor` on any of these.** A background color overrides the material and is the single most common way apps end up looking pre-iOS-26. If you need the bar tinted, let the content layer inform it instead — that's the HIG guidance and it's also what the material already does.
 
+## The real material on a custom view: `expo-glass-effect`
+
+The table above says luminosity adaptation and specular highlights are unreachable from RN. That's true of `expo-blur`, which wraps the older `UIVisualEffectView`. It is **not** true of `expo-glass-effect`, which wraps the actual iOS 26 glass effect — reach for this before hand-building anything.
+
+```jsx
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { BlurView } from 'expo-blur';
+
+// isLiquidGlassAvailable() checks the runtime AND compiler version AND Info.plist,
+// so it's false on older iOS and on builds made with an older toolchain.
+function GlassSurface({ style, children }) {
+  if (!isLiquidGlassAvailable()) {
+    return <BlurView intensity={60} tint="systemMaterial" style={style}>{children}</BlurView>;
+  }
+  return <GlassView style={style} glassEffectStyle="regular">{children}</GlassView>;
+}
+```
+
+`glassEffectStyle` takes `'regular'` (default), `'clear'`, or `'none'`, and is supported on **iOS and tvOS**. To fade glass in or out, pass the config form rather than animating `opacity` — the native transition is what Apple's own surfaces do, and animating opacity on a glass view fights the material:
+
+```jsx
+<GlassView
+  glassEffectStyle={{ style: visible ? 'clear' : 'none', animate: true, animationDuration: 0.5 }}
+/>
+```
+
+Everything in the next section still applies to the fallback path, and the accessibility rules below apply to **both** paths — `isLiquidGlassAvailable()` says nothing about whether the user has asked for reduced transparency.
+
 ## Approximating it on custom views
 
 Only for custom surfaces the system doesn't provide. Keep it to your app's most important functional elements, per the "use Liquid Glass sparingly" rule.
@@ -269,5 +297,7 @@ const style = useAnimatedStyle(() => ({ opacity: visible.value ? 1 : 0 }));
 - [ ] Gradient overlays used only where no native bar exists, and kept subtle.
 - [ ] Android uses an elevated opaque surface, not a fake blur.
 - [ ] Blur view count bounded; none inside list items; none nested.
-- [ ] `intensity` never animated; opacity animated instead.
+- [ ] `expo-glass-effect` used (gated by `isLiquidGlassAvailable()`) before hand-building a glass surface.
+- [ ] Glass faded via `glassEffectStyle: { animate: true }`, not by animating `opacity`.
+- [ ] `intensity` never animated on a `BlurView`; animate a wrapping `opacity` instead.
 - [ ] Verified on the oldest supported device for frame rate.

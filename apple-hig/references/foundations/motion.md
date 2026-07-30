@@ -97,6 +97,36 @@ const enter = () => {
 
 Note `reduced ? 0` assigns directly rather than animating to 0 — that's the "replace translation with a fade" rule, not "make the translation faster".
 
+**Reanimated's built-in Reduce Motion handling is not the same as the HIG's.** Every animation
+already defaults to `ReduceMotion.System`, and layout animations accept `.reduceMotion(...)`:
+
+```js
+import { ReduceMotion, ReducedMotionConfig, withTiming, BounceIn, FadeIn } from 'react-native-reanimated';
+
+withTiming(v, { duration, reduceMotion: ReduceMotion.System });  // System (default) | Always | Never
+BounceIn.reduceMotion(ReduceMotion.System);                       // layout animations
+<ReducedMotionConfig mode={ReduceMotion.Never} />                  // app-wide override
+```
+
+What `System` does when the setting is on is **finish the animation instantly** (and skip exiting
+animations and shared transitions). That is not what Apple asks for: the prescription is to *replace*
+translation with a fade, not to remove the transition. So relying on the default gives you a
+compliant-looking library setting and a non-compliant UI — an element that should cross-fade instead
+snaps into place.
+
+Treat the default as a safety net for animations you forgot, and branch explicitly on
+`useReducedMotion()` for anything a person will actually notice. Where an entering animation should
+become a fade, swap the animation rather than damping it:
+
+```js
+const reduced = useReducedMotion();
+const entering = reduced ? FadeIn : BounceIn;
+```
+
+`ReducedMotionConfig` with `ReduceMotion.Never` disables the whole mechanism app-wide. It exists for
+apps that handle the setting entirely by hand; reaching for it to "fix" animations that look wrong
+under Reduce Motion is how apps ship ignoring the setting.
+
 ### Match the gesture's direction
 
 ```jsx

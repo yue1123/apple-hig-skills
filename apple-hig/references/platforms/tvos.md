@@ -281,13 +281,15 @@ The tab bar has to move to the top. `@react-navigation/bottom-tabs` puts it at t
 ```jsx
 <Tab.Navigator
   screenOptions={{
-    tabBarPosition: 'top',                       // React Navigation 7; confirm on your version
+    // React Navigation 7 added tabBarPosition ('bottom' | 'top' | 'left' | 'right')
+    // specifically to support TV platforms. On v6 there is no such option.
+    tabBarPosition: 'top',
     tabBarStyle: { paddingTop: TV_SAFE.top, paddingHorizontal: TV_SAFE.left },
   }}
 >
 ```
 
-If your version doesn't support `tabBarPosition`, render your own focusable tab row above the content rather than restyling the bottom bar in place. Either way, `menu` must return focus to that row (see the remote handler above), and the row participates in the focus engine like anything else — five focus states, scale-based focus indication, 66 pt targets.
+On v6, render your own focusable tab row above the content rather than restyling the bottom bar in place. Note also that `react-native-bottom-tabs` — the right answer for a real `UITabBarController` on iOS — is **iOS and Android only**, so it is not the tvOS path. Either way, `menu` must return focus to that row (see the remote handler above), and the row participates in the focus engine like anything else — five focus states, scale-based focus indication, 66 pt targets.
 
 ### Type and controls
 

@@ -16,7 +16,7 @@ description: >-
 
 # Apple Human Interface Guidelines for React Native
 
-The complete HIG (172 pages) distilled into 33 reference files, each pairing Apple's rules with
+The complete HIG (172 pages) distilled into 35 reference files, each pairing Apple's rules with
 concrete React Native implementations, exact metrics, and a review checklist.
 
 **Never guess at a value.** Every number in this skill comes from the HIG — hit targets, type
@@ -110,6 +110,8 @@ written to be scannable and mechanically verifiable.
 | Read this | When you're… |
 |---|---|
 | [design-tokens.md](references/rn/design-tokens.md) | Starting a project or building a theme layer — copy-pasteable token files |
+| [navigation.md](references/rn/navigation.md) | Wiring navigators, headers, tab bars, sheets — native-stack vs stack, detents, dismissal guards |
+| [lists-and-performance.md](references/rn/lists-and-performance.md) | Building any list or grid — FlatList vs FlashList, row metrics, virtualization, row accessibility |
 | [liquid-glass.md](references/rn/liquid-glass.md) | Implementing glass/blur surfaces, scroll edge effects |
 | [platform-strategy.md](references/rn/platform-strategy.md) | Deciding project structure, libraries, or which platforms to target |
 
@@ -180,6 +182,8 @@ Ranked by how frequently they appear and how visible they are:
 13. **`AsyncStorage` for tokens** instead of Keychain/SecureStore.
 14. **A full-screen spinner** as a loading state instead of skeletons.
 15. **No `accessibilityLabel`** on icon-only controls.
+16. **A bottom tab bar carried over to tvOS** — tvOS tab bars sit at the **top** of the screen. Rare,
+    but it's the first thing anyone notices on a TV port.
 
 ## Universal review checklist
 
