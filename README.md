@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-An agent skill that gives Claude Apple's Human Interface Guidelines — all 172 pages of them — distilled into 33 reference files, each pairing Apple's rules with the React Native code that implements them.
+An agent skill that gives Claude Apple's Human Interface Guidelines — all 172 pages of them — distilled into 35 reference files, each pairing Apple's rules with the React Native code that implements them.
 
 Models are good at React Native and vague about Apple. Ask for a settings screen and you get something that works, renders, and quietly reads as Android: a fixed row height, a hard-coded `#F2F2F7`, a hand-rolled header, a Material chevron. Every one of those is a real number the HIG specifies and the model approximated.
 
@@ -32,20 +32,40 @@ None of that is a judgement call. It's all documented, and it's all in here.
 
 ### It measurably changes the answer
 
-Five tasks from [`evals.json`](apple-hig/evals/evals.json), each answered twice by identical agents — one with the skill, one with no access to it and no web search. Same model, same prompt, same length budget. Scored against each eval's `expected_output`, decomposed into checkable points:
+Twenty agents, ten per arm, all answering the same question from
+[`evals.json`](apple-hig/evals/evals.json): port an iOS media app to Apple TV. One arm loads the skill;
+the other has no access to it and no web search. Same model, same prompt, same length budget. Scored
+by script against nine points extracted from the eval's `expected_output`:
+
+| | Mean | Range |
+|---|---|---|
+| With skill (n=10) | **8.72** / 10 | 8.00 – 9.50 |
+| Baseline (n=10) | 4.80 / 10 | 3.08 – 6.08 |
+
+**The two ranges don't overlap** — the skill's worst run still beats the baseline's best. The failures
+cluster, too: 10 of 10 baseline runs missed the 60/80 pt overscan safe area, 10 of 10 missed tvOS's
+66 pt hit targets, and 10 of 10 caught only one of the three navigation behaviours. Those are points
+the skill arm scored every time.
+
+Across a wider spread of tasks — one run each, so read these as directional rather than measured:
 
 | Task | With skill | Baseline |
 |---|---|---|
 | Port an Android-designed settings screen to iOS | **9.0** / 9 | 5.0 / 9 |
-| Ship an iOS media app on Apple TV | **9.0** / 9 | 5.0 / 9 |
+| Ship an iOS media app on Apple TV | **8.5** / 9 | 5.5 / 9 |
 | Present an edit-profile sheet with unsaved changes | **6.5** / 7 | 4.0 / 7 |
 | Get the iOS 26 glass material on a tab bar | **6.0** / 8 | 5.0 / 8 |
 | Review a component for App Store & a11y flags | **9.0** / 9 | 8.5 / 9 |
-| **Total** | **39.5 / 42 · 94%** | 27.5 / 42 · 65% |
+| **Total** | **39.0 / 42 · 93%** | 28.0 / 42 · 67% |
 
-The gap is not uniform, and that's the useful part. It's widest on platform-specific knowledge that's thin in training data, and nearly closed on generic accessibility review — contrast ratios and missing labels are already well known. What the baseline got wrong were specifics: `height: 44` instead of `minHeight`, the system palette hard-coded as literals, an alert where an action sheet belongs, Expo claimed to support tvOS, no Reduce Transparency fallback.
+The gap is not uniform, and that's the useful part. It's widest on platform-specific knowledge that's
+thin in training data, and nearly closed on generic accessibility review — contrast ratios and missing
+labels are already well known. What the baseline got wrong were specifics: `height: 44` instead of
+`minHeight`, the system palette hard-coded as literals, an alert where an action sheet belongs, no
+Reduce Transparency fallback.
 
-One run each, scored non-blind — treat the ordering as the finding, not the exact number.
+Scored non-blind, by the same person who wrote the skill's fixes. The 10-vs-10 run used a mechanical
+rubric; the five-task sweep involved judgement on partial credit.
 
 ## Reference
 
@@ -93,6 +113,8 @@ Start at [`SKILL.md`](apple-hig/SKILL.md) — it holds the routing table, the cr
 **React Native implementation**
 
 - [design-tokens.md](apple-hig/references/rn/design-tokens.md) — copy-pasteable token files
+- [navigation.md](apple-hig/references/rn/navigation.md) — native-stack vs stack, headers, native tab bars, sheet detents, dismissal guards
+- [lists-and-performance.md](apple-hig/references/rn/lists-and-performance.md) — FlatList vs FlashList, the Dynamic Type / `getItemLayout` conflict, row metrics
 - [liquid-glass.md](apple-hig/references/rn/liquid-glass.md) — glass surfaces, scroll edge effects
 - [platform-strategy.md](apple-hig/references/rn/platform-strategy.md) — project structure, libraries, which platforms to target
 
@@ -124,4 +146,8 @@ Two caveats the skill states about its own content: specific colour values and s
 
 ## Contributing
 
-The [evals](apple-hig/evals/evals.json) are the fastest way to check whether a change helps. Add a task with an `expected_output`, run it with and without the skill, and see whether the reference file you edited actually gets read and applied — the A/B above surfaced two content gaps that way, including a tvOS tab bar detail the references never stated.
+The [evals](apple-hig/evals/evals.json) are the fastest way to check whether a change helps. Add a task with an `expected_output`, run it with and without the skill, and see whether the reference file you edited actually gets read and applied.
+
+That loop is worth running, because being *in* the skill is not the same as being read. tvOS tab bars sit at the top of the screen, and the references never said so — agents got it wrong. Adding it to a reference file fixed the answer 2 times in 10. Moving the same sentence into `SKILL.md`'s list of common mistakes — main-file prose, so it always enters context — fixed it 9 times in 10, with the wrong answers going to zero (Fisher exact, one-tailed p = 0.0027).
+
+The lesson generalizes: if a rule must not be missed, it belongs in `SKILL.md` itself, not on line 300 of a reference file.

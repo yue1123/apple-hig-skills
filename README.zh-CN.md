@@ -2,7 +2,7 @@
 
 [English](README.md) · **简体中文**
 
-一个 agent skill，把 Apple 的 Human Interface Guidelines 完整 172 页蒸馏成 33 个参考文件交给 Claude，每一条 Apple 规则旁边都配着实现它的 React Native 代码。
+一个 agent skill，把 Apple 的 Human Interface Guidelines 完整 172 页蒸馏成 35 个参考文件交给 Claude，每一条 Apple 规则旁边都配着实现它的 React Native 代码。
 
 模型对 React Native 很熟，对 Apple 则含糊。让它写一个设置页，你会拿到一个能跑、能渲染、但读起来悄悄像 Android 的东西：固定的行高、硬编码的 `#F2F2F7`、手搓的 header、一个 Material 风格的 chevron。这里每一处都是 HIG 明确规定过的数值，而模型只是近似了它。
 
@@ -32,20 +32,29 @@ cp -r apple-hig ~/.claude/skills/
 
 ### 它确实改变了答案，而且可测量
 
-取 [`evals.json`](apple-hig/evals/evals.json) 中的 5 个任务，各由两个完全相同的 agent 回答一遍 —— 一个带 skill，一个既不能访问 skill 也不能联网搜索。同一模型、同一 prompt、同一篇幅预算。评分依据每个 eval 的 `expected_output`，拆成可核验的评分点：
+20 个 agent，每组 10 个，回答 [`evals.json`](apple-hig/evals/evals.json) 里的同一个问题：把 iOS 媒体应用移植到 Apple TV。一组加载 skill，另一组既不能访问 skill 也不能联网搜索。同一模型、同一 prompt、同一篇幅预算。由脚本按该 eval 的 `expected_output` 拆出的 9 个评分点统一打分：
+
+| | 均值 | 区间 |
+|---|---|---|
+| 带 skill（n=10） | **8.72** / 10 | 8.00 – 9.50 |
+| baseline（n=10） | 4.80 / 10 | 3.08 – 6.08 |
+
+**两组区间完全不重叠** —— skill 组最差的一次仍高于 baseline 最好的一次。失分也高度聚集：baseline 组 10/10 全部漏掉 60/80 pt 的 overscan 安全区，10/10 全部漏掉 tvOS 的 66 pt 命中区，10/10 都只命中导航三要素中的一项。这几项 skill 组每次都拿满。
+
+覆盖面更广的一组数据 —— 每个任务只跑一次，请当作方向性参考而非测量值：
 
 | 任务 | 带 skill | baseline |
 |---|---|---|
 | 把 Android 设计的设置页移植到 iOS | **9.0** / 9 | 5.0 / 9 |
-| 把 iOS 媒体应用发布到 Apple TV | **9.0** / 9 | 5.0 / 9 |
+| 把 iOS 媒体应用发布到 Apple TV | **8.5** / 9 | 5.5 / 9 |
 | 呈现带未保存修改的编辑资料 sheet | **6.5** / 7 | 4.0 / 7 |
 | 让 tab bar 用上 iOS 26 玻璃材质 | **6.0** / 8 | 5.0 / 8 |
 | 审查组件的 App Store 与无障碍风险 | **9.0** / 9 | 8.5 / 9 |
-| **总计** | **39.5 / 42 · 94%** | 27.5 / 42 · 65% |
+| **总计** | **39.0 / 42 · 93%** | 28.0 / 42 · 67% |
 
-差距并不均匀，而这恰恰是有价值的部分。它在训练数据稀薄的平台专属知识上最大，在通用无障碍审查上几乎归零 —— 对比度和缺失 label 这类问题本来就众所周知。baseline 答错的都是具体细节：把 `minHeight` 写成 `height: 44`、把系统色板当字面量硬编码、该用 action sheet 的地方用了 alert、声称 Expo 支持 tvOS、漏掉 Reduce Transparency 的回退。
+差距并不均匀，而这恰恰是有价值的部分。它在训练数据稀薄的平台专属知识上最大，在通用无障碍审查上几乎归零 —— 对比度和缺失 label 这类问题本来就众所周知。baseline 答错的都是具体细节：把 `minHeight` 写成 `height: 44`、把系统色板当字面量硬编码、该用 action sheet 的地方用了 alert、漏掉 Reduce Transparency 的回退。
 
-每个任务只跑了一次，且评分非盲 —— 请把任务间的排序当作结论，而不是把具体数字当作结论。
+评分非盲，且由写这些修补的同一人完成。10v10 那组用的是机械规则；5 任务那组的部分给分含判断成分。
 
 ## 参考文件
 
@@ -93,6 +102,8 @@ cp -r apple-hig ~/.claude/skills/
 **React Native 实现**
 
 - [design-tokens.md](apple-hig/references/rn/design-tokens.md) —— 可直接复制的 token 文件
+- [navigation.md](apple-hig/references/rn/navigation.md) —— native-stack 与 stack 之别、header、原生 tab bar、sheet detents、关闭拦截
+- [lists-and-performance.md](apple-hig/references/rn/lists-and-performance.md) —— FlatList 与 FlashList、Dynamic Type 与 `getItemLayout` 的冲突、行度量
 - [liquid-glass.md](apple-hig/references/rn/liquid-glass.md) —— 玻璃表面、滚动边缘效果
 - [platform-strategy.md](apple-hig/references/rn/platform-strategy.md) —— 项目结构、库选型、该支持哪些平台
 
@@ -124,4 +135,8 @@ skill 对自身内容声明了两点：具体色值和弹簧参数会漂移，�
 
 ## 参与改进
 
-[evals](apple-hig/evals/evals.json) 是验证一处改动是否有效的最快途径。加一个带 `expected_output` 的任务，分别在带 skill 和不带 skill 的情况下跑一遍，看你改的那个参考文件是否真的被读到并被应用 —— 上面那次 A/B 就是这样暴露出两处内容缺口的，其中一个是参考文件从未写明的 tvOS tab bar 细节。
+[evals](apple-hig/evals/evals.json) 是验证一处改动是否有效的最快途径。加一个带 `expected_output` 的任务，分别在带 skill 和不带 skill 的情况下跑一遍，看你改的那个参考文件是否真的被读到并被应用。
+
+这个循环值得跑，因为**内容在 skill 里 ≠ 内容会被读到**。tvOS 的 tab bar 在屏幕顶部，而参考文件从没写明这点 —— agent 于是答错。把它加进参考文件后，10 次里修正了 2 次；把同一句话移进 `SKILL.md` 的常见错误列表（主文件正文，必然进入上下文）后，10 次里修正了 9 次，且错误答案清零（Fisher 精确检验单尾 p = 0.0027）。
+
+这条经验可以推广：**如果一条规则绝不能被漏掉，它就该写在 `SKILL.md` 里，而不是某个参考文件的第 300 行。**
