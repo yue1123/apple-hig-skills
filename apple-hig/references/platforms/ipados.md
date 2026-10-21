@@ -105,7 +105,7 @@ The iPad rule is not "support touch and also support pointer" — it's that peop
 |---|---|
 | Size class | **Regular × regular** for all iPads, both orientations, full screen |
 | Viewing distance | ~3 feet |
-| Minimum hit target | 44 × 44 pt (same as iOS) |
+| Default / minimum hit target | 44 × 44 pt / 28 × 28 pt (same as iOS) |
 | Default body text | 17 pt |
 | Scale factor | @2x |
 | Logical widths (portrait) | 744 / 768 / 810 / 820 / 834 / 1024 / 1032 pt |
@@ -174,7 +174,8 @@ For the system pointer effects (lift, highlight) you need `react-native-ios-cont
 ### Keyboard shortcuts
 
 ```jsx
-// react-native-key-command, or native-stack's UIKeyCommand support.
+// useKeyCommand is illustrative: wrap react-native-key-command or a small native
+// module that registers UIKeyCommand. Neither RN core nor native-stack provides one.
 useKeyCommand({ input: 'n', modifiers: ['command'] }, newDocument);
 useKeyCommand({ input: 'z', modifiers: ['command'] }, undo);
 useKeyCommand({ input: 'z', modifiers: ['command', 'shift'] }, redo);

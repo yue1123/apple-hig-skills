@@ -190,7 +190,7 @@ The banner shown when your app is in the top row of the Home Screen.
 npx @react-native-community/cli init MyTVApp --template react-native-tvos@latest
 ```
 
-Expo does not support tvOS. Many community packages lack tvOS support; check for `Platform.isTV` handling before adopting one.
+Expo works via `@react-native-tvos/config-tv` + `expo prebuild` (set `EXPO_TV=1`); Expo Go does not run on tvOS, so you need a development build. → [rn/platform-strategy.md](../rn/platform-strategy.md). Many community packages lack tvOS support; check for `Platform.isTV` handling before adopting one.
 
 ### Focus is the central concern
 

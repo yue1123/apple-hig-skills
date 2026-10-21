@@ -59,7 +59,7 @@ Collected from across the HIG, these are the iOS-specific rules that most often 
 - One sheet at a time; never sheet-behind-sheet.
 
 **Controls**
-- **44 × 44 pt** minimum hit region; ~12 pt padding around bezeled controls, ~24 pt around borderless ones. → [accessibility.md](../foundations/accessibility.md)
+- **44 × 44 pt** default hit region (28 × 28 pt absolute minimum — treat 44 as the target); ~12 pt padding around bezeled controls, ~24 pt around borderless ones. → [accessibility.md](../foundations/accessibility.md)
 - Switch style **only in a list row**; a toggling button elsewhere.
 - **Clear button** on text fields; correct `keyboardType` and `textContentType` on every field.
 - Segmented controls: **≤ 5 segments on iPhone**, text or icons but not both.
@@ -80,7 +80,8 @@ Collected from across the HIG, these are the iOS-specific rules that most often 
 
 | Metric | Value |
 |---|---|
-| Minimum hit target | 44 × 44 pt |
+| Default hit target | 44 × 44 pt |
+| Minimum hit target | 28 × 28 pt |
 | Padding around bezeled controls | ~12 pt |
 | Padding around borderless controls | ~24 pt |
 | Default body text | 17 pt |

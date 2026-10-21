@@ -238,13 +238,13 @@ useEffect(() => {
 ### Audio interruptions — the two-kind rule
 
 ```js
-import { Audio } from 'expo-av';
+import { setAudioModeAsync } from 'expo-audio';   // expo-av is deprecated
 
-await Audio.setAudioModeAsync({
+await setAudioModeAsync({
   // Ducking = the short-interruption behavior: lower volume, then restore.
-  interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DUCK_OTHERS,
-  playsInSilentModeIOS: true,
-  staysActiveInBackground: true,
+  interruptionMode: 'duckOthers',
+  playsInSilentMode: true,
+  shouldPlayInBackground: true,
 });
 
 // Primary interruptions (another music app took over) must pause indefinitely —
@@ -260,7 +260,8 @@ const pauseReason = useRef(null);
 // iOS grants a short window on backgrounding — finish or checkpoint, don't assume
 // unlimited time. For real background work use expo-task-manager /
 // react-native-background-fetch, or hand the transfer to the OS:
-import * as FileSystem from 'expo-file-system';
+// Pause/resume lives only in the legacy API; the new File API has no resumable download.
+import * as FileSystem from 'expo-file-system/legacy';
 const task = FileSystem.createDownloadResumable(url, dest, {}, onProgress);
 await task.downloadAsync();
 // Persist task.savable() so the download survives suspension and resumes on relaunch.

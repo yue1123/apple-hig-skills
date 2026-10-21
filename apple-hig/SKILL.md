@@ -166,7 +166,8 @@ Ranked by how frequently they appear and how visible they are:
 1. **`@react-navigation/stack` instead of `@react-navigation/native-stack`** — wrong push
    animation, no interactive back-swipe, no large titles, no real sheets.
 2. **`<SafeAreaView style={{flex:1}}>` as the outermost element** — leaves a colored band under
-   the notch and stops content short of the screen edges.
+   the notch and stops content short of the screen edges. React Native's own `SafeAreaView` is
+   also deprecated (0.81+) — use `react-native-safe-area-context` insets instead.
 3. **Hard-coded hex where `PlatformColor` exists** — stops adapting to appearance and contrast
    settings, and drifts after OS updates.
 4. **`backgroundColor` on a native header or tab bar** — overrides the Liquid Glass material.

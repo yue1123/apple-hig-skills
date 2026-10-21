@@ -134,7 +134,7 @@ chevron off the row instead of wrapping.
 Use `react-native-gesture-handler`'s `Swipeable`, or `ReanimatedSwipeable` for the current API. Two
 HIG rules that are easy to miss: a swipe action must have a non-gesture equivalent (a context menu or
 a row in an edit mode), and a destructive swipe action needs undo rather than a confirmation.
-→ [rn/gestures.md](gestures.md), [patterns/feedback-and-loading.md](../patterns/feedback-and-loading.md)
+→ [inputs.md](../inputs.md), [patterns/feedback-and-loading.md](../patterns/feedback-and-loading.md)
 
 ## Images in rows
 

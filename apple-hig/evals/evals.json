@@ -19,7 +19,7 @@
       "id": 2,
       "name": "tvos-focus-port",
       "prompt": "We want to ship our RN iOS app on Apple TV. It's a media browsing app — horizontal rows of 300x170 poster cards, a bottom tab bar, and 17pt captions under each card. What has to change?",
-      "expected_output": "Explains react-native-tvos as a separate app/fork (no Expo); explains the focus engine (every element focusable, focus via scale+animation not color, five focus states, assets at focused size); computes spacing for focus growth; applies the 60/80pt overscan safe area manually; replaces the iOS type scale with the tvOS one (29pt body Medium, 23pt min) so 17pt captions are called out as unreadable; notes 66pt targets; notes tab bar scroll/pin behavior and Menu=parent-not-previous; mentions Top Shelf needs a Swift extension.",
+      "expected_output": "Explains react-native-tvos as a fork (Expo only via @react-native-tvos/config-tv + prebuild, not Expo Go); explains the focus engine (every element focusable, focus via scale+animation not color, five focus states, assets at focused size); computes spacing for focus growth; applies the 60/80pt overscan safe area manually; replaces the iOS type scale with the tvOS one (29pt body Medium, 23pt min) so 17pt captions are called out as unreadable; notes 66pt targets; notes tab bar scroll/pin behavior and Menu=parent-not-previous; mentions Top Shelf needs a Swift extension.",
       "files": []
     },
     {

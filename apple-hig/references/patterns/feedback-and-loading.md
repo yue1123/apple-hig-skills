@@ -126,8 +126,10 @@ const reduced = useReducedMotion();
 
 ```jsx
 // If the API gives you total bytes, show real progress.
-const task = FileSystem.createDownloadResumable(url, dest, {}, ({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-  setProgress(totalBytesWritten / totalBytesExpectedToWrite);
+import { File, Paths } from 'expo-file-system';
+
+await File.downloadFileAsync(url, Paths.document, {
+  onProgress: ({ bytesWritten, totalBytes }) => setProgress(bytesWritten / totalBytes),
 });
 
 <Progress value={progress} accessibilityRole="progressbar"
@@ -234,7 +236,8 @@ const [future, setFuture] = useState([]);
 RN has no shake-to-undo or Edit-menu integration out of the box. On iPad/macOS, wire the standard keys:
 
 ```jsx
-// react-native-keyevent, or native-stack's keyboard shortcut APIs.
+// useKeyCommand is illustrative: wrap react-native-key-command or a small native
+// module that registers UIKeyCommand. Neither RN core nor native-stack provides one.
 useKeyCommand({ input: 'z', modifiers: ['command'] }, undo);
 useKeyCommand({ input: 'z', modifiers: ['command', 'shift'] }, redo);
 ```

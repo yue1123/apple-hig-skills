@@ -178,27 +178,27 @@ Consider a **Now Playing view** so people can control current or recent audio wi
 This is the single most consequential audio setting in an RN app, and the default is usually wrong:
 
 ```js
-import { Audio } from 'expo-av';
+// expo-av is deprecated and removed from current Expo SDKs — use expo-audio.
+import { setAudioModeAsync } from 'expo-audio';
 
 // A game or app with incidental sound → Ambient: respects the silent switch,
 // and does NOT stop the user's music.
-await Audio.setAudioModeAsync({
-  playsInSilentModeIOS: false,        // respects silent switch  → "ambient"
-  staysActiveInBackground: false,
-  interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS,
-  shouldDuckAndroid: true,
+await setAudioModeAsync({
+  playsInSilentMode: false,           // respects silent switch  → "ambient"
+  shouldPlayInBackground: false,
+  interruptionMode: 'mixWithOthers',
 });
 
 // A podcast/audiobook player → Playback: essential audio, ignores silent switch,
-// continues in the background.
-await Audio.setAudioModeAsync({
-  playsInSilentModeIOS: true,
-  staysActiveInBackground: true,
-  interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+// continues in the background (also needs UIBackgroundModes: audio).
+await setAudioModeAsync({
+  playsInSilentMode: true,
+  shouldPlayInBackground: true,
+  interruptionMode: 'doNotMix',
 });
 ```
 
-`playsInSilentModeIOS: true` on a game's sound effects is the common mistake — it makes silent mode not silence you, which is exactly what people set it for.
+`playsInSilentMode: true` on a game's sound effects is the common mistake — it makes silent mode not silence you, which is exactly what people set it for.
 
 For real media apps use `react-native-track-player`, which owns the session, lock-screen controls, and remote events properly:
 
@@ -231,10 +231,10 @@ TrackPlayer.addEventListener(Event.RemoteDuck, ({ paused, permanent }) => {
 Headphone disconnect must pause immediately:
 
 ```js
-// react-native-track-player emits this; with expo-av, listen for route changes natively.
+// react-native-track-player emits this; with expo-audio, listen for route changes natively.
 TrackPlayer.addEventListener(Event.RemoteDuck, /* … */);
 // Android: AudioManager.ACTION_AUDIO_BECOMING_NOISY. iOS: AVAudioSession route change
-// with reason .oldDeviceUnavailable. Both need a native module with expo-av.
+// with reason .oldDeviceUnavailable. Both need a native module with expo-audio.
 ```
 
 ### Video

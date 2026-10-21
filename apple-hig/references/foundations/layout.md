@@ -231,7 +231,7 @@ function Screen({ children }) {
 }
 ```
 
-Two mistakes this avoids: `<SafeAreaView style={{flex:1}}>` as the outermost element (which shrinks the frame, leaving a colored band at the top and stopping content short of the edges), and forgetting `insets.left/right` (which only matter in landscape on notched devices — and are exactly what reviewers catch).
+Two mistakes this avoids: `<SafeAreaView style={{flex:1}}>` as the outermost element (which shrinks the frame, leaving a colored band at the top and stopping content short of the edges — and React Native's core `SafeAreaView` is deprecated since 0.81 anyway; import from `react-native-safe-area-context` if you need the component), and forgetting `insets.left/right` (which only matter in landscape on notched devices — and are exactly what reviewers catch).
 
 For a floating Liquid Glass-style tab bar, content must scroll *under* it, so add the bar height to `paddingBottom` rather than reserving layout space for it.
 

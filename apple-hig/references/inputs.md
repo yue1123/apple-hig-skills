@@ -208,9 +208,10 @@ Show unavailability rather than silently ignoring:
 ### Keyboard shortcuts
 
 ```jsx
-// react-native-keyevent, react-native-key-command, or native-stack's
-// UIKeyCommand support. Register with discoverability titles so the
-// hold-Command overlay lists them.
+// useKeyCommand is illustrative: wrap react-native-key-command or a small
+// native module that registers UIKeyCommand — neither RN core nor native-stack
+// provides one. Register with discoverability titles so the hold-Command
+// overlay lists them.
 useKeyCommand({ input: 'n', modifiers: ['command'], title: 'New Document' }, newDoc);
 useKeyCommand({ input: 'z', modifiers: ['command'], title: 'Undo' }, undo);
 useKeyCommand({ input: 'z', modifiers: ['command', 'shift'], title: 'Redo' }, redo);
