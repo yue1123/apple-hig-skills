@@ -2,6 +2,8 @@
 
 [English](README.md) · **简体中文**
 
+[![skills.sh](https://skills.sh/b/yue1123/apple-hig-skills)](https://skills.sh/yue1123/apple-hig-skills)
+
 一个 agent skill，把 Apple 的 Human Interface Guidelines 完整 172 页蒸馏成 35 个参考文件交给 Claude，每一条 Apple 规则旁边都配着实现它的 React Native 代码。
 
 模型对 React Native 很熟，对 Apple 则含糊。让它写一个设置页，你会拿到一个能跑、能渲染、但读起来悄悄像 Android 的东西：固定的行高、硬编码的 `#F2F2F7`、手搓的 header、一个 Material 风格的 chevron。这里每一处都是 HIG 明确规定过的数值，而模型只是近似了它。
@@ -14,7 +16,15 @@
 
 ## 安装
 
-克隆或下载本仓库，然后：
+用 [skills CLI](https://skills.sh)：
+
+```bash
+npx skills add yue1123/apple-hig-skills
+```
+
+加 `-g` 则安装到全局，而不是当前项目。
+
+也可以手动安装 —— 克隆或下载本仓库，然后：
 
 ```bash
 cp -r apple-hig ~/.claude/skills/

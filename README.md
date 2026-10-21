@@ -2,6 +2,8 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
+[![skills.sh](https://skills.sh/b/yue1123/apple-hig-skills)](https://skills.sh/yue1123/apple-hig-skills)
+
 An agent skill that gives Claude Apple's Human Interface Guidelines — all 172 pages of them — distilled into 35 reference files, each pairing Apple's rules with the React Native code that implements them.
 
 Models are good at React Native and vague about Apple. Ask for a settings screen and you get something that works, renders, and quietly reads as Android: a fixed row height, a hard-coded `#F2F2F7`, a hand-rolled header, a Material chevron. Every one of those is a real number the HIG specifies and the model approximated.
@@ -15,7 +17,15 @@ This skill removes the approximating. **Never guess at a value** — hit targets
 
 ## Install
 
-Clone or download this repo, then:
+With the [skills CLI](https://skills.sh):
+
+```bash
+npx skills add yue1123/apple-hig-skills
+```
+
+Add `-g` to install for your whole machine instead of the current project.
+
+Or manually — clone or download this repo, then:
 
 ```bash
 cp -r apple-hig ~/.claude/skills/
